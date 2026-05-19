@@ -532,26 +532,60 @@ function saveEntry() {
     });
 
     return;
+
+} else if (currentModal === 'file') {
+
+  const title = document.getElementById('f-title').value.trim();
+
+  if (!title) {
+    alert('Please enter a file name.');
+    return;
   }
 
-  else if (currentModal === 'file') {
+  const fileData = {
+    mode: 'file',
+    subject: document.getElementById('f-subj').value,
+    quarter: document.getElementById('f-qtr').value,
+    ftype: document.getElementById('f-ftype').value,
+    title: title,
+    link: document.getElementById('f-link').value.trim()
+  };
 
-    const title = document.getElementById('f-title').value.trim();
+  fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify(fileData)
+  })
+  .then(res => res.text())
+  .then(text => {
 
-    if (!title) {
-      alert('Please enter a file name.');
-      return;
-    }
+    console.log(text);
 
+    // instant local update
     state.files.push({
       id: Date.now(),
-      subj: document.getElementById('f-subj').value,
-      quarter: document.getElementById('f-qtr').value,
-      ftype: document.getElementById('f-ftype').value,
-      title
+      subj: fileData.subject,
+      quarter: fileData.quarter,
+      ftype: fileData.ftype,
+      title: fileData.title,
+      url: fileData.url
     });
 
-  }
+    refreshCurrent();
+    closeModal();
+
+  })
+  .catch(err => {
+
+    console.error(err);
+    alert('Failed to save file.');
+
+  });
+
+  return;
+}
 
   else if (currentModal === 'project') {
 
