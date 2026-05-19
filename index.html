@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homeschool Hub — Teddy</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --color-bg: #f5f5f3;
+    --color-surface: #ffffff;
+    --color-surface-secondary: #f1f0ec;
+    --color-border: rgba(0,0,0,0.1);
+    --color-border-secondary: rgba(0,0,0,0.18);
+    --color-text: #1a1a18;
+    --color-text-secondary: #6b6b68;
+    --color-text-tertiary: #a0a09c;
+    --color-accent: #1D9E75;
+    --color-accent-dark: #0F6E56;
+    --color-accent-light: #E1F5EE;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --sidebar-w: 224px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #1a1a18;
+      --color-surface: #242422;
+      --color-surface-secondary: #2e2e2b;
+      --color-border: rgba(255,255,255,0.1);
+      --color-border-secondary: rgba(255,255,255,0.18);
+      --color-text: #f0f0ec;
+      --color-text-secondary: #9a9a96;
+      --color-text-tertiary: #5a5a56;
+      --color-accent-light: #0a3028;
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--color-bg); color: var(--color-text); font-size: 14px; }
+  .app { display: flex; height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); background: var(--color-surface); border-right: 0.5px solid var(--color-border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+  .sidebar-header { padding: 16px 16px 12px; border-bottom: 0.5px solid var(--color-border); }
+  .logo { font-size: 15px; font-weight: 500; color: var(--color-text); display: flex; align-items: center; gap: 8px; }
+  .logo i { font-size: 18px; color: var(--color-accent); }
+  .student-chip { margin-top: 10px; background: var(--color-surface-secondary); border-radius: var(--radius-md); padding: 8px 10px; display: flex; align-items: center; gap: 8px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: #9FE1CB; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #085041; flex-shrink: 0; }
+  .student-name { font-size: 12px; font-weight: 500; color: var(--color-text); }
+  .student-grade { font-size: 11px; color: var(--color-text-secondary); }
+  .nav { flex: 1; padding: 12px 8px; }
+  .nav-section { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: .6px; text-transform: uppercase; padding: 10px 8px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; color: var(--color-text-secondary); transition: background .12s; user-select: none; }
+  .nav-item:hover { background: var(--color-surface-secondary); }
+  .nav-item.active { background: var(--color-accent-light); color: var(--color-accent-dark); font-weight: 500; }
+  .nav-item i { font-size: 15px; width: 18px; text-align: center; }
+  .subject-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: var(--color-surface); border-bottom: 0.5px solid var(--color-border); padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
+  .topbar-title { font-size: 15px; font-weight: 500; white-space: nowrap; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .qtr-pills { display: flex; gap: 5px; }
+  .qtr-pill { padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); cursor: pointer; color: var(--color-text-secondary); background: transparent; transition: background .12s; }
+  .qtr-pill.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+  .btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 13px; color: var(--color-text); cursor: pointer; transition: background .12s; font-family: inherit; }
+  .btn:hover { background: var(--color-surface-secondary); }
+  .btn-primary { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+  .btn-primary:hover { background: var(--color-accent-dark); border-color: var(--color-accent-dark); }
+  .btn i { font-size: 14px; }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 20px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CARDS & LAYOUT */
+  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .metric-card { background: var(--color-surface-secondary); border-radius: var(--radius-md); padding: 14px 16px; }
+  .metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .metric-value { font-size: 22px; font-weight: 500; }
+  .metric-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-title { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .section-title i { font-size: 15px; color: var(--color-text-secondary); }
+  .card { background: var(--color-surface); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden; }
+  .card-inner { padding: 16px; }
+  .progress-wrap { flex: 1; height: 6px; background: var(--color-surface-secondary); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); padding: 8px 12px; border-bottom: 0.5px solid var(--color-border); white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 0.5px solid var(--color-border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--color-surface-secondary); }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .badge-green { background: #EAF3DE; color: #3B6D11; }
+  .badge-amber { background: #FAEEDA; color: #854F0B; }
+  .badge-red { background: #FCEBEB; color: #A32D2D; }
+  .badge-blue { background: #E6F1FB; color: #185FA5; }
+  .badge-gray { background: var(--color-surface-secondary); color: var(--color-text-secondary); }
+  .badge-teal { background: #E1F5EE; color: #0F6E56; }
+  .badge-purple { background: #EEEDFE; color: #3C3489; }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 2px; padding: 0 16px; border-bottom: 0.5px solid var(--color-border); background: var(--color-surface); flex-wrap: wrap; }
+  .tab { padding: 10px 14px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: color .12s; }
+  .tab.active { color: var(--color-accent-dark); border-bottom-color: var(--color-accent); font-weight: 500; }
+  .tab:hover { color: var(--color-text); }
+  .tab-content { display: none; padding: 16px; }
+  .tab-content.active { display: block; }
+
+  /* SUBJECT */
+  .subject-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .subject-icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-field label { font-size: 11px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+  input[type=text], input[type=number], select, textarea {
+    background: var(--color-surface-secondary); border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--radius-md); padding: 7px 10px; font-size: 13px; color: var(--color-text);
+    font-family: inherit; width: 100%; transition: border-color .12s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 2px rgba(29,158,117,0.15); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--color-surface); border-radius: var(--radius-lg); border: 0.5px solid var(--color-border); width: 500px; max-width: calc(100vw - 32px); max-height: 88vh; overflow-y: auto; }
+  .modal-header { padding: 16px 20px 12px; border-bottom: 0.5px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header h3 { font-size: 14px; font-weight: 500; }
+  .modal-body { padding: 16px 20px; }
+  .modal-footer { padding: 12px 20px 16px; border-top: 0.5px solid var(--color-border); display: flex; justify-content: flex-end; gap: 8px; }
+  .close-btn { background: none; border: none; cursor: pointer; color: var(--color-text-secondary); font-size: 18px; padding: 0; line-height: 1; }
+  .close-btn:hover { color: var(--color-text); }
+
+  /* MISC */
+  .empty-state { padding: 32px; text-align: center; color: var(--color-text-secondary); font-size: 13px; }
+  .empty-state i { font-size: 32px; display: block; margin-bottom: 8px; opacity: .35; }
+  .file-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 0.5px solid var(--color-border); font-size: 13px; }
+  .file-item:last-child { border-bottom: none; }
+  .file-icon { width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .file-name { flex: 1; }
+  .file-meta { font-size: 11px; color: var(--color-text-secondary); }
+  .file-link { font-size: 12px; color: var(--color-accent); text-decoration: none; }
+  .file-link:hover { text-decoration: underline; }
+  .notice { font-size: 12px; color: var(--color-text-secondary); background: var(--color-surface-secondary); border-radius: var(--radius-md); padding: 8px 10px; margin-bottom: 12px; display: flex; gap: 6px; align-items: flex-start; }
+  .qtr-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .qtr-card { border: 0.5px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; text-align: center; background: var(--color-surface); }
+  .qtr-card.highlight { border-color: var(--color-accent); background: var(--color-accent-light); }
+  .qtr-card-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .qtr-card-val { font-size: 20px; font-weight: 500; }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 180px; }
+    .overview-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .qtr-summary-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo"><i class="ti ti-school"></i> Homeschool Hub</div>
+      <div class="student-chip">
+        <div class="avatar">T</div>
+        <div>
+          <div class="student-name">Teddy</div>
+          <div class="student-grade">Grade 3 · S.Y. 2026–2027</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div class="nav-item" onclick="showPage('grades',this)"><i class="ti ti-chart-bar"></i> Grade Report</div>
+      <div class="nav-section">Subjects</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="Math"><span class="subject-dot" style="background:#378ADD"></span> Math</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="Science"><span class="subject-dot" style="background:#1D9E75"></span> Science</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="English"><span class="subject-dot" style="background:#D85A30"></span> English</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="Filipino / GMRC"><span class="subject-dot" style="background:#D4537E"></span> Filipino / GMRC</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="Computer"><span class="subject-dot" style="background:#7F77DD"></span> Computer</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="Arts & P.E."><span class="subject-dot" style="background:#EF9F27"></span> Arts & P.E.</div>
+      <div class="nav-item" onclick="showPage('subject',this)" data-subj="Faith"><span class="subject-dot" style="background:#E24B4A"></span> Faith</div>
+      <div class="nav-section">Records</div>
+      <div class="nav-item" onclick="showPage('files',this)"><i class="ti ti-folder"></i> Files & Workbooks</div>
+      <div class="nav-item" onclick="showPage('projects',this)"><i class="ti ti-checks"></i> Projects</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="qtr-pills" id="global-qtr-pills">
+          <div class="qtr-pill active" onclick="setGlobalQtr('All',this)">All</div>
+          <div class="qtr-pill" onclick="setGlobalQtr('Q1',this)">Q1</div>
+          <div class="qtr-pill" onclick="setGlobalQtr('Q2',this)">Q2</div>
+          <div class="qtr-pill" onclick="setGlobalQtr('Q3',this)">Q3</div>
+          <div class="qtr-pill" onclick="setGlobalQtr('Q4',this)">Q4</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()"><i class="ti ti-plus"></i> Add</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="content page active" id="page-dashboard">
+      <div class="overview-grid">
+        <div class="metric-card"><div class="metric-label"><i class="ti ti-star"></i> Overall Average</div><div class="metric-value" id="ov-avg">—</div><div class="metric-sub" id="ov-avg-sub">all quarters</div></div>
+        <div class="metric-card"><div class="metric-label"><i class="ti ti-file-text"></i> Assessments</div><div class="metric-value" id="ov-assess">0</div><div class="metric-sub">quizzes, exams & activities</div></div>
+        <div class="metric-card"><div class="metric-label"><i class="ti ti-folder"></i> Files Linked</div><div class="metric-value" id="ov-files">0</div><div class="metric-sub">workbooks & outputs</div></div>
+        <div class="metric-card"><div class="metric-label"><i class="ti ti-checks"></i> Projects</div><div class="metric-value" id="ov-proj">0</div><div class="metric-sub">tracked tasks</div></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="section-header"><div class="section-title"><i class="ti ti-chart-bar"></i> Grades by Subject</div></div>
+          <div class="card"><div class="card-inner" id="grades-overview-list"><div class="empty-state"><i class="ti ti-chart-bar"></i>Add assessments to see grades</div></div></div>
+        </div>
+        <div>
+          <div class="section-header"><div class="section-title"><i class="ti ti-clock"></i> Recent Activity</div></div>
+          <div class="card"><div id="recent-list"><div class="empty-state"><i class="ti ti-clock"></i>No entries yet</div></div></div>
+        </div>
+      </div>
+      <div class="section-header"><div class="section-title"><i class="ti ti-checks"></i> Projects</div></div>
+      <div class="card"><div class="card-inner" id="proj-dash-list"><div class="empty-state"><i class="ti ti-checks"></i>No projects yet</div></div></div>
+    </div>
+
+    <!-- GRADE REPORT -->
+    <div class="content page" id="page-grades">
+      <div class="qtr-summary-grid" id="qtr-summary-cards"></div>
+      <div class="notice"><i class="ti ti-info-circle"></i> Averages are calculated from all entries for the selected quarter. The Final Average is the mean of all four quarters.</div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject</th><th>Quiz Avg</th><th>Exam Avg</th><th>Activity Avg</th>
+                <th>Quarter Avg</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>
+                <th>Final Avg</th><th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="grade-report-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBJECT PAGE -->
+    <div class="content page" id="page-subject">
+      <div class="subject-header">
+        <div class="subject-icon" id="subj-icon-display"></div>
+        <div>
+          <div style="font-size:15px;font-weight:500" id="subj-title-display"></div>
+          <div style="font-size:12px;color:var(--color-text-secondary)" id="subj-avg-display"></div>
+        </div>
+      </div>
+      <div class="tab-bar" id="subj-tabs">
+        <div class="tab active" onclick="showSubjTab('quizzes',this)">Quizzes</div>
+        <div class="tab" onclick="showSubjTab('exams',this)">Exams</div>
+        <div class="tab" onclick="showSubjTab('activities',this)">Activities</div>
+        <div class="tab" onclick="showSubjTab('books',this)">Books</div>
+        <div class="tab" onclick="showSubjTab('subj-files',this)">Files</div>
+      </div>
+      <div class="tab-content active" id="tab-quizzes"></div>
+      <div class="tab-content" id="tab-exams"></div>
+      <div class="tab-content" id="tab-activities"></div>
+      <div class="tab-content" id="tab-books"></div>
+      <div class="tab-content" id="tab-subj-files"></div>
+    </div>
+
+    <!-- FILES -->
+    <div class="content page" id="page-files">
+      <div class="card"><div id="files-list"><div class="empty-state"><i class="ti ti-folder"></i>No files linked yet. Click "Add" to attach a Google Drive or Canva link.</div></div></div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="content page" id="page-projects">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Title</th><th>Subject</th><th>Type</th><th>Quarter</th><th>Due Date</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+            <tbody id="proj-table-body"><tr><td colspan="8" class="empty-state">No projects yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add Entry</h3>
+      <button class="close-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEntry()"><i class="ti ti-check"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUBJECTS = ['Math','Science','English','Filipino / GMRC','Computer','Arts & P.E.','Faith'];
+const SUBJ_COLORS = {Math:'#378ADD',Science:'#1D9E75',English:'#D85A30','Filipino / GMRC':'#D4537E',Computer:'#7F77DD','Arts & P.E.':'#EF9F27',Faith:'#E24B4A'};
+const SUBJ_ICONS = {Math:'ti-math-function',Science:'ti-flask',English:'ti-book','Filipino / GMRC':'ti-language',Computer:'ti-device-laptop','Arts & P.E.':'ti-palette',Faith:'ti-heart'};
+const QUARTERS = ['Q1','Q2','Q3','Q4'];
+
+let state = { assessments:[], files:[], projects:[], currentPage:'dashboard', currentSubject:null, globalQtr:'All' };
+try { const s = localStorage.getItem('hshub3'); if(s) state = {...state, ...JSON.parse(s)}; } catch(e) {}
+function save() { try { localStorage.setItem('hshub3', JSON.stringify(state)); } catch(e) {} }
+
+let currentModal = null;
+
+function setGlobalQtr(q, el) {
+  state.globalQtr = q;
+  document.querySelectorAll('#global-qtr-pills .qtr-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  refreshCurrent();
+}
+
+function filteredAssessments(subj, type) {
+  let items = state.assessments;
+  if (subj) items = items.filter(a => a.subj === subj);
+  if (type) items = items.filter(a => a.type === type);
+  if (state.globalQtr !== 'All') items = items.filter(a => a.quarter === state.globalQtr);
+  return items;
+}
+
+function getAvg(items) {
+  if (!items.length) return null;
+  return Math.round(items.reduce((s,a) => s + a.pct, 0) / items.length);
+}
+
+function getSubjectAvg(subj, type) { return getAvg(filteredAssessments(subj, type)); }
+
+function getSubjectQtrAvg(subj, qtr) {
+  return getAvg(state.assessments.filter(a => a.subj === subj && a.quarter === qtr));
+}
+
+function getFinalAvg(subj) {
+  const avgs = QUARTERS.map(q => getSubjectQtrAvg(subj, q)).filter(v => v !== null);
+  if (!avgs.length) return null;
+  return Math.round(avgs.reduce((a,b) => a + b, 0) / avgs.length);
+}
+
+function gradeRemarks(avg) {
+  if (avg === null) return { text:'—', cls:'badge-gray' };
+  if (avg >= 90) return { text:'Outstanding', cls:'badge-teal' };
+  if (avg >= 80) return { text:'Very Satisfactory', cls:'badge-green' };
+  if (avg >= 70) return { text:'Satisfactory', cls:'badge-blue' };
+  if (avg >= 60) return { text:'Fairly Satisfactory', cls:'badge-amber' };
+  return { text:'Needs Improvement', cls:'badge-red' };
+}
+
+function showPage(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  state.currentPage = page;
+  if (page === 'subject') {
+    state.currentSubject = el && el.dataset.subj ? el.dataset.subj : state.currentSubject;
+    document.getElementById('page-title').textContent = state.currentSubject;
+  } else {
+    const titles = { dashboard:'Dashboard', grades:'Grade Report', files:'Files & Workbooks', projects:'Projects' };
+    document.getElementById('page-title').textContent = titles[page] || page;
+  }
+  document.getElementById('page-' + page)?.classList.add('active');
+  refreshCurrent();
+}
+
+function refreshCurrent() {
+  const p = state.currentPage;
+  if (p === 'dashboard') renderDashboard();
+  else if (p === 'grades') renderGradeReport();
+  else if (p === 'subject') renderSubjectPage(state.currentSubject);
+  else if (p === 'files') renderFiles();
+  else if (p === 'projects') renderProjects();
+}
+
+function openAddModal() {
+  const p = state.currentPage;
+  if (p === 'files') showAddFile();
+  else if (p === 'projects') showAddProject();
+  else showAddAssessment(p === 'subject' ? state.currentSubject : null);
+}
+
+function qtrOpts(sel) { return QUARTERS.map(q => `<option value="${q}" ${q===sel?'selected':''}>${q}</option>`).join(''); }
+function subjOpts(sel) { return SUBJECTS.map(s => `<option value="${s}" ${s===sel?'selected':''}>${s}</option>`).join(''); }
+
+function showAddAssessment(subj) {
+  currentModal = 'assessment';
+  document.getElementById('modal-title').textContent = 'Add Assessment';
+  const defQtr = state.globalQtr !== 'All' ? state.globalQtr : 'Q1';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-grid">
+      <div class="form-field"><label>Subject</label><select id="f-subj">${subjOpts(subj)}</select></div>
+      <div class="form-field"><label>Quarter</label><select id="f-qtr">${qtrOpts(defQtr)}</select></div>
+      <div class="form-field"><label>Type</label><select id="f-type"><option>Quiz</option><option>Exam</option><option>Activity</option></select></div>
+      <div class="form-field"><label>Title</label><input type="text" id="f-title" placeholder="e.g. Chapter 3 Quiz"></div>
+      <div class="form-field"><label>Score</label><input type="number" id="f-score" min="0" placeholder="e.g. 38"></div>
+      <div class="form-field"><label>Total / Max Score</label><input type="number" id="f-total" min="1" placeholder="e.g. 40"></div>
+      <div class="form-field"><label>Date</label><input type="text" id="f-date" placeholder="e.g. May 19, 2026"></div>
+      <div class="form-field"><label>Notes (optional)</label><input type="text" id="f-notes" placeholder="remarks"></div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function showAddFile() {
+  currentModal = 'file';
+  document.getElementById('modal-title').textContent = 'Add File or Workbook';
+  const defQtr = state.globalQtr !== 'All' ? state.globalQtr : 'Q1';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-grid">
+      <div class="form-field"><label>Subject</label><select id="f-subj">${subjOpts()}</select></div>
+      <div class="form-field"><label>Quarter</label><select id="f-qtr">${qtrOpts(defQtr)}</select></div>
+      <div class="form-field"><label>Type</label><select id="f-ftype"><option>Book</option><option>Workbook</option><option>Quiz Sheet</option><option>Exam Paper</option><option>Output / Project</option><option>Reference</option><option>Other</option></select></div>
+      <div class="form-field"><label>File Name / Title</label><input type="text" id="f-title" placeholder="e.g. Science Q1 Workbook"></div>
+      <div class="form-field" style="grid-column:span 2"><label>Link (Google Drive, Canva, etc.)</label><input type="text" id="f-link" placeholder="https://drive.google.com/..."></div>
+      <div class="form-field"><label>Date Added</label><input type="text" id="f-date" placeholder="e.g. May 2026"></div>
+      <div class="form-field"><label>Notes</label><input type="text" id="f-notes" placeholder="optional"></div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function showAddProject() {
+  currentModal = 'project';
+  document.getElementById('modal-title').textContent = 'Add Project or Task';
+  const defQtr = state.globalQtr !== 'All' ? state.globalQtr : 'Q1';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-grid">
+      <div class="form-field" style="grid-column:span 2"><label>Project / Task Title</label><input type="text" id="f-title" placeholder="e.g. Science Diorama"></div>
+      <div class="form-field"><label>Subject</label><select id="f-subj">${subjOpts()}</select></div>
+      <div class="form-field"><label>Quarter</label><select id="f-qtr">${qtrOpts(defQtr)}</select></div>
+      <div class="form-field"><label>Type</label><select id="f-ptype"><option>Project</option><option>Output</option><option>Assignment</option><option>Performance Task</option><option>Other</option></select></div>
+      <div class="form-field"><label>Status</label><select id="f-status"><option>Not Started</option><option>In Progress</option><option>Done</option><option>Submitted</option></select></div>
+      <div class="form-field"><label>Due Date</label><input type="text" id="f-date" placeholder="e.g. June 10, 2026"></div>
+      <div class="form-field"><label>Notes</label><input type="text" id="f-notes" placeholder="optional"></div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function saveEntry() {
+  if (currentModal === 'assessment') {
+    const score = parseFloat(document.getElementById('f-score').value);
+    const total = parseFloat(document.getElementById('f-total').value);
+    const title = document.getElementById('f-title').value.trim();
+    if (!title || isNaN(score) || isNaN(total) || total <= 0) { alert('Please fill in title, score, and total.'); return; }
+    state.assessments.push({ id:Date.now(), subj:document.getElementById('f-subj').value, quarter:document.getElementById('f-qtr').value, type:document.getElementById('f-type').value, title, score, total, pct:Math.round(score/total*100), date:document.getElementById('f-date').value.trim(), notes:document.getElementById('f-notes').value.trim() });
+  } else if (currentModal === 'file') {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { alert('Please enter a file name.'); return; }
+    state.files.push({ id:Date.now(), subj:document.getElementById('f-subj').value, quarter:document.getElementById('f-qtr').value, ftype:document.getElementById('f-ftype').value, title, link:document.getElementById('f-link').value.trim(), date:document.getElementById('f-date').value.trim(), notes:document.getElementById('f-notes').value.trim() });
+  } else if (currentModal === 'project') {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { alert('Please enter a title.'); return; }
+    state.projects.push({ id:Date.now(), title, subj:document.getElementById('f-subj').value, quarter:document.getElementById('f-qtr').value, ptype:document.getElementById('f-ptype').value, status:document.getElementById('f-status').value, date:document.getElementById('f-date').value.trim(), notes:document.getElementById('f-notes').value.trim() });
+  }
+  save(); closeModal(); refreshCurrent();
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); currentModal = null; }
+function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
+
+function renderDashboard() {
+  const items = filteredAssessments(null, null);
+  const allAvgs = SUBJECTS.map(s => getSubjectAvg(s, null)).filter(v => v !== null);
+  const overall = allAvgs.length ? Math.round(allAvgs.reduce((a,b) => a+b, 0) / allAvgs.length) : null;
+  document.getElementById('ov-avg').textContent = overall !== null ? overall + '%' : '—';
+  document.getElementById('ov-avg-sub').textContent = state.globalQtr === 'All' ? 'all quarters' : state.globalQtr;
+  document.getElementById('ov-assess').textContent = items.length;
+  document.getElementById('ov-files').textContent = state.files.length;
+  document.getElementById('ov-proj').textContent = state.projects.length;
+
+  const gl = document.getElementById('grades-overview-list');
+  const subjsWithData = SUBJECTS.filter(s => filteredAssessments(s, null).length > 0);
+  if (!subjsWithData.length) {
+    gl.innerHTML = '<div class="empty-state"><i class="ti ti-chart-bar"></i>Add assessments to see grades</div>';
+  } else {
+    gl.innerHTML = subjsWithData.map(s => {
+      const avg = getSubjectAvg(s, null) || 0;
+      const c = SUBJ_COLORS[s];
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${c};display:inline-block"></span>${s}</span>
+          <span style="font-size:13px;font-weight:500">${avg}%</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${avg}%;background:${c}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  const rl = document.getElementById('recent-list');
+  const recent = [...state.assessments].slice(-8).reverse();
+  if (!recent.length) {
+    rl.innerHTML = '<div class="empty-state"><i class="ti ti-clock"></i>No entries yet</div>';
+  } else {
+    rl.innerHTML = recent.map(r => `
+      <div class="file-item">
+        <i class="ti ti-pencil" style="font-size:15px;color:var(--color-text-secondary)"></i>
+        <div style="flex:1"><div style="font-size:13px">${r.title}</div><div style="font-size:11px;color:var(--color-text-secondary)">${r.subj} · ${r.quarter} · ${r.date||''}</div></div>
+        <span class="badge badge-gray">${r.type}</span>
+      </div>`).join('');
+  }
+
+  const pdl = document.getElementById('proj-dash-list');
+  if (!state.projects.length) {
+    pdl.innerHTML = '<div class="empty-state"><i class="ti ti-checks"></i>No projects yet</div>';
+  } else {
+    pdl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      ${state.projects.map(p => {
+        const scls = p.status==='Done'||p.status==='Submitted' ? 'badge-green' : p.status==='In Progress' ? 'badge-amber' : 'badge-gray';
+        return `<div style="border:0.5px solid var(--color-border);border-radius:var(--radius-md);padding:10px 12px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:2px">${p.title}</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px">${p.subj} · ${p.quarter}</div>
+          <span class="badge ${scls}">${p.status}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+}
+
+function renderGradeReport() {
+  const sc = document.getElementById('qtr-summary-cards');
+  const activeQtr = state.globalQtr;
+  sc.innerHTML = QUARTERS.map(q => {
+    const avgs = SUBJECTS.map(s => getSubjectQtrAvg(s, q)).filter(v => v !== null);
+    const qavg = avgs.length ? Math.round(avgs.reduce((a,b) => a+b,0) / avgs.length) : null;
+    const isActive = activeQtr === q;
+    return `<div class="qtr-card${isActive ? ' highlight' : ''}">
+      <div class="qtr-card-label">${q}</div>
+      <div class="qtr-card-val" style="color:${isActive ? 'var(--color-accent-dark)' : 'var(--color-text)'}">${qavg !== null ? qavg + '%' : '—'}</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${avgs.length} subject${avgs.length!==1?'s':''} with data</div>
+    </div>`;
+  }).join('');
+
+  const fmt = v => v !== null ? v + '%' : '—';
+  document.getElementById('grade-report-body').innerHTML = SUBJECTS.map(s => {
+    const qa = getSubjectAvg(s,'Quiz'), ea = getSubjectAvg(s,'Exam'), aa = getSubjectAvg(s,'Activity');
+    const qavg = getSubjectAvg(s, null);
+    const final = getFinalAvg(s);
+    const r = gradeRemarks(final);
+    const qtrCols = QUARTERS.map(q => {
+      const v = getSubjectQtrAvg(s, q);
+      return `<td style="font-size:12px;${state.globalQtr===q?'font-weight:500;color:var(--color-accent-dark)':''}">${fmt(v)}</td>`;
+    }).join('');
+    return `<tr>
+      <td><span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:${SUBJ_COLORS[s]};display:inline-block"></span>${s}</span></td>
+      <td>${fmt(qa)}</td><td>${fmt(ea)}</td><td>${fmt(aa)}</td>
+      <td style="font-weight:500">${fmt(qavg)}</td>
+      ${qtrCols}
+      <td style="font-weight:500;color:var(--color-accent-dark)">${fmt(final)}</td>
+      <td><span class="badge ${r.cls}">${r.text}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSubjectPage(subj) {
+  const c = SUBJ_COLORS[subj] || '#888';
+  const icon = SUBJ_ICONS[subj] || 'ti-book';
+  document.getElementById('subj-icon-display').innerHTML = `<i class="ti ${icon}" style="font-size:18px;color:${c}"></i>`;
+  document.getElementById('subj-icon-display').style.background = c + '22';
+  document.getElementById('subj-title-display').textContent = subj;
+  const avg = getSubjectAvg(subj, null);
+  const final = getFinalAvg(subj);
+  const parts = [];
+  if (state.globalQtr !== 'All') parts.push(`${state.globalQtr} avg: ${avg !== null ? avg + '%' : '—'}`);
+  if (final !== null) parts.push(`Final avg: ${final}%`);
+  document.getElementById('subj-avg-display').textContent = parts.join(' · ') || 'No assessments yet';
+  document.querySelectorAll('#subj-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector('#subj-tabs .tab').classList.add('active');
+  document.getElementById('tab-quizzes').classList.add('active');
+  renderAssessTab(subj, 'Quiz', 'tab-quizzes');
+  renderAssessTab(subj, 'Exam', 'tab-exams');
+  renderAssessTab(subj, 'Activity', 'tab-activities');
+  renderBooks(subj);
+  renderSubjFiles(subj);
+}
+
+function renderAssessTab(subj, type, tabId) {
+  let items = state.assessments.filter(a => a.subj === subj && a.type === type);
+  if (state.globalQtr !== 'All') items = items.filter(a => a.quarter === state.globalQtr);
+  const el = document.getElementById(tabId);
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-pencil"></i>No ${type.toLowerCase()}s ${state.globalQtr !== 'All' ? 'for ' + state.globalQtr : ''}</div>`;
+    return;
+  }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr><th>Quarter</th><th>Title</th><th>Score</th><th>Total</th><th>%</th><th>Date</th><th>Notes</th><th></th></tr></thead>
+    <tbody>${items.map(a => {
+      const cls = a.pct>=90?'badge-teal':a.pct>=75?'badge-green':a.pct>=60?'badge-amber':'badge-red';
+      return `<tr>
+        <td><span class="badge badge-purple">${a.quarter}</span></td>
+        <td>${a.title}</td><td>${a.score}</td><td>${a.total}</td>
+        <td><span class="badge ${cls}">${a.pct}%</span></td>
+        <td style="color:var(--color-text-secondary)">${a.date||'—'}</td>
+        <td style="color:var(--color-text-secondary);font-size:12px">${a.notes||''}</td>
+        <td><button onclick="deleteAssessment(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+
+function renderBooks(subj) {
+  let books = state.files.filter(f => f.subj === subj && f.ftype === 'Book');
+  if (state.globalQtr !== 'All') books = books.filter(f => f.quarter === state.globalQtr);
+
+  const el = document.getElementById('tab-books');
+
+  if (!books.length) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-book"></i>No books added for this subject</div>`;
+    return;
+  }
+
+  el.innerHTML = books.map(f => {
+    const lh = f.link
+      ? `<a href="${f.link}" target="_blank" class="file-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open Book</a>`
+      : '<span style="color:var(--color-text-tertiary);font-size:12px">No link</span>';
+
+    return `<div class="file-item">
+      <div class="file-icon" style="background:${SUBJ_COLORS[f.subj]+'22'}">
+        <i class="ti ti-book" style="font-size:15px;color:${SUBJ_COLORS[f.subj]}"></i>
+      </div>
+      <div style="flex:1">
+        <div class="file-name">${f.title}</div>
+        <div class="file-meta">Book · ${f.quarter} · ${f.date||''}</div>
+        ${lh}
+      </div>
+      <button onclick="deleteFile(${f.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px">
+        <i class="ti ti-trash"></i>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function renderSubjFiles(subj) {
+  let files = state.files.filter(f => f.subj === subj);
+  if (state.globalQtr !== 'All') files = files.filter(f => f.quarter === state.globalQtr);
+  const el = document.getElementById('tab-subj-files');
+  if (!files.length) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-folder"></i>No files for this subject${state.globalQtr !== 'All' ? ' in ' + state.globalQtr : ''}</div>`;
+    return;
+  }
+  el.innerHTML = files.map(f => {
+    const lh = f.link ? `<a href="${f.link}" target="_blank" class="file-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open link</a>` : '<span style="color:var(--color-text-tertiary);font-size:12px">No link</span>';
+    return `<div class="file-item">
+      <div class="file-icon" style="background:${SUBJ_COLORS[f.subj]+'22'}"><i class="ti ti-file" style="font-size:15px;color:${SUBJ_COLORS[f.subj]}"></i></div>
+      <div style="flex:1"><div class="file-name">${f.title}</div><div class="file-meta">${f.ftype} · ${f.quarter} · ${f.date||''} ${f.notes?'· '+f.notes:''}</div>${lh}</div>
+      <button onclick="deleteFile(${f.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function renderFiles() {
+  let files = state.files;
+  if (state.globalQtr !== 'All') files = files.filter(f => f.quarter === state.globalQtr);
+  const el = document.getElementById('files-list');
+  if (!files.length) {
+    el.innerHTML = `<div class="empty-state"><i class="ti ti-folder"></i>No files${state.globalQtr !== 'All' ? ' for ' + state.globalQtr : ''}. Click "Add" to link a file.</div>`;
+    return;
+  }
+  const bySubj = {};
+  files.forEach(f => { if (!bySubj[f.subj]) bySubj[f.subj] = []; bySubj[f.subj].push(f); });
+  el.innerHTML = Object.entries(bySubj).map(([s, fs]) => `
+    <div style="border-bottom:0.5px solid var(--color-border);padding:8px 12px 4px">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${SUBJ_COLORS[s]}"></span>${s}
+      </div>
+      ${fs.map(f => {
+        const lh = f.link ? `<a href="${f.link}" target="_blank" class="file-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open</a>` : '';
+        return `<div class="file-item" style="padding:7px 0">
+          <div class="file-icon" style="background:${SUBJ_COLORS[f.subj]+'22'}"><i class="ti ti-file" style="font-size:15px;color:${SUBJ_COLORS[f.subj]}"></i></div>
+          <div style="flex:1"><div class="file-name">${f.title}</div><div class="file-meta">${f.ftype} · ${f.quarter} · ${f.date||''}</div>${lh}</div>
+          <button onclick="deleteFile(${f.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function renderProjects() {
+  let projs = state.projects;
+  if (state.globalQtr !== 'All') projs = projs.filter(p => p.quarter === state.globalQtr);
+  const tbody = document.getElementById('proj-table-body');
+  if (!projs.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No projects${state.globalQtr !== 'All' ? ' for ' + state.globalQtr : ''}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = projs.map(p => `<tr>
+    <td style="font-weight:500">${p.title}</td>
+    <td><span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${SUBJ_COLORS[p.subj]}"></span>${p.subj}</span></td>
+    <td>${p.ptype}</td>
+    <td><span class="badge badge-purple">${p.quarter}</span></td>
+    <td style="color:var(--color-text-secondary)">${p.date||'—'}</td>
+    <td><select onchange="updateProjStatus(${p.id},this.value)" style="font-size:12px;padding:3px 6px;background:var(--color-surface-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--radius-md);color:var(--color-text);font-family:inherit">
+      ${['Not Started','In Progress','Done','Submitted'].map(s => `<option ${s===p.status?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td style="font-size:12px;color:var(--color-text-secondary)">${p.notes||''}</td>
+    <td><button onclick="deleteProject(${p.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button></td>
+  </tr>`).join('');
+}
+
+function updateProjStatus(id, status) {
+  const p = state.projects.find(x => x.id === id);
+  if (p) { p.status = status; save(); }
+}
+
+function deleteAssessment(id) {
+  if (!confirm('Delete this assessment?')) return;
+  state.assessments = state.assessments.filter(a => a.id !== id);
+  save(); renderSubjectPage(state.currentSubject);
+}
+
+function deleteFile(id) {
+  if (!confirm('Remove this file?')) return;
+  state.files = state.files.filter(f => f.id !== id);
+  save(); refreshCurrent();
+}
+
+function deleteProject(id) {
+  if (!confirm('Delete this project?')) return;
+  state.projects = state.projects.filter(p => p.id !== id);
+  save(); renderProjects();
+}
+
+function showSubjTab(tab, el) {
+  document.querySelectorAll('#subj-tabs .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const map = { quizzes:'tab-quizzes', exams:'tab-exams', activities:'tab-activities', books:'tab-books', 'subj-files':'tab-subj-files' };
+  document.getElementById(map[tab])?.classList.add('active');
+  if (tab === 'subj-files') {
+    renderSubjFiles(state.currentSubject);
+  }
+  else if (tab === 'books') {
+    renderBooks(state.currentSubject);
+  }
+  else { const tm = { quizzes:'Quiz', exams:'Exam', activities:'Activity' }; renderAssessTab(state.currentSubject, tm[tab], map[tab]); }
+}
+
+renderDashboard();
+</script>
+</body>
+</html>
