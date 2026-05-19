@@ -702,7 +702,7 @@ function renderAssessTab(subj, type, tabId) {
   }) : '—'}
 </td>
         <td style="color:var(--color-text-secondary);font-size:12px">${a.notes||''}</td>
-        <td><button onclick="deleteAssessment(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button></td>
+        <td><button onclick="deleteAssessment('${a.id || ''}')" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join('')}</tbody>
   </table>`;
@@ -813,9 +813,16 @@ function updateProjStatus(id, status) {
 }
 
 function deleteAssessment(id) {
+
+  if (!id) return;
+
   if (!confirm('Delete this assessment?')) return;
+
   state.assessments = state.assessments.filter(a => a.id !== id);
-  save(); renderSubjectPage(state.currentSubject);
+
+  save();
+
+  renderSubjectPage(state.currentSubject);
 }
 
 function deleteFile(id) {
