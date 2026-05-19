@@ -357,7 +357,10 @@ function filteredAssessments(subj, type) {
 
 function getAvg(items) {
   if (!items.length) return null;
-  return Math.round(items.reduce((s,a) => s + a.pct, 0) / items.length);
+ return Math.round(
+  items.reduce((s, a) => s + ((a.score / a.total) * 100), 0)
+  / items.length
+);
 }
 
 function getSubjectAvg(subj, type) { return getAvg(filteredAssessments(subj, type)); }
