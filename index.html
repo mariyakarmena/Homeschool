@@ -503,20 +503,26 @@ function saveEntry() {
       body: JSON.stringify(assessment)
     })
     .then(res => res.text())
-    .then(text => {
+.then(text => {
 
-      console.log(text);
+  console.log(text);
 
-      return loadAssessmentsFromSheet();
+  // instant local update
+  state.assessments.push({
+    ...assessment,
+    subj: assessment.subject,
+    pct: Math.round((assessment.score / assessment.total) * 100),
+    id: Date.now()
+  });
 
-    })
-    .then(() => {
+  refreshCurrent();
 
-      refreshCurrent();
+  closeModal();
 
-      closeModal();
+  // background sync
+  loadAssessmentsFromSheet();
 
-    })
+})
     .catch(err => {
 
       console.error(err);
