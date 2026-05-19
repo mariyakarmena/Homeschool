@@ -337,6 +337,20 @@ function save() { try { localStorage.setItem('hshub3', JSON.stringify(state)); }
 
   renderDashboard();
 }
+async function loadFilesFromSheet() {
+
+  const url = 'https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec?type=files';
+
+  const res = await fetch(url);
+
+  const data = await res.json();
+
+  console.log(data);
+
+  state.files = data;
+
+  refreshCurrent();
+}
   
 let currentModal = null;
 
@@ -570,7 +584,7 @@ function saveEntry() {
       quarter: fileData.quarter,
       ftype: fileData.ftype,
       title: fileData.title,
-      url: fileData.url
+      link: fileData.link
     });
 
     refreshCurrent();
@@ -912,7 +926,8 @@ function showSubjTab(tab, el) {
 }
 
 renderDashboard();
-  loadAssessmentsFromSheet();
+loadAssessmentsFromSheet();
+loadFilesFromSheet();
 </script>
 </body>
 </html>
