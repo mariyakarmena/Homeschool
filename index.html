@@ -495,38 +495,45 @@ function saveEntry() {
       notes: document.getElementById('f-notes').value.trim()
     };
 
-    fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
+fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'text/plain;charset=utf-8'
   },
   body: JSON.stringify(assessment)
 })
-    .then(res => res.json())
-    .then(data => {
+.then(res => res.text())
+.then(text => {
 
-      console.log('Saved to sheet:', data);
+  console.log('RAW RESPONSE:', text);
 
-      return loadAssessmentsFromSheet();
+  let data;
 
-    })
-    .then(() => {
-
-      refreshCurrent();
-
-      closeModal();
-
-    })
-    .catch(err => {
-
-      console.error(err);
-
-      alert('Failed to save.');
-
-    });
-
-    return;
+  try {
+    data = JSON.parse(text);
+  } catch(e) {
+    throw new Error('Invalid JSON response');
   }
+
+  console.log('Saved to sheet:', data);
+
+  return loadAssessmentsFromSheet();
+
+})
+.then(() => {
+
+  refreshCurrent();
+
+  closeModal();
+
+})
+.catch(err => {
+
+  console.error(err);
+
+  alert('Failed to save.');
+
+});
 
   else if (currentModal === 'file') {
 
