@@ -496,12 +496,12 @@ function saveEntry() {
     };
 
     fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(assessment)
-    })
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(assessment)
+})
     .then(res => res.json())
     .then(data => {
 
