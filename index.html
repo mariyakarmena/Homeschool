@@ -622,12 +622,13 @@ function renderAssessTab(subj, type, tabId) {
         <td><span class="badge badge-purple">${a.quarter}</span></td>
         <td>${a.title}</td><td>${a.score}</td><td>${a.total}</td>
         <td><span class="badge ${cls}">${a.pct}%</span></td>
-        <td style="color:var(--color-text-secondary)"
-        <td>${a.date ? new Date(a.date).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric'
-}) : '—'}</td>
+        <td style="color:var(--color-text-secondary)">
+  ${a.date ? new Date(a.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }) : '—'}
+</td>
         <td style="color:var(--color-text-secondary);font-size:12px">${a.notes||''}</td>
         <td><button onclick="deleteAssessment(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);font-size:14px"><i class="ti ti-trash"></i></button></td>
       </tr>`;
