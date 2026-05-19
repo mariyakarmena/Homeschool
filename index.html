@@ -472,46 +472,85 @@ function showAddProject() {
 }
 
 function saveEntry() {
+
   if (currentModal === 'assessment') {
+
     const score = parseFloat(document.getElementById('f-score').value);
     const total = parseFloat(document.getElementById('f-total').value);
     const title = document.getElementById('f-title').value.trim();
-    if (!title || isNaN(score) || isNaN(total) || total <= 0) { alert('Please fill in title, score, and total.'); return; }
-const assessment = {
-  subject: document.getElementById('f-subj').value,
-  quarter: document.getElementById('f-qtr').value,
-  type: document.getElementById('f-type').value,
-  title: title,
-  score: score,
-  total: total,
-  date: document.getElementById('f-date').value.trim(),
-  notes: document.getElementById('f-notes').value.trim()
-};
 
-fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
-  method: 'POST',
-  body: JSON.stringify(assessment)
-})
-.then(res => res.json())
-.then(data => {
-  console.log('Saved to sheet:', data);
+    if (!title || isNaN(score) || isNaN(total) || total <= 0) {
+      alert('Please fill in title, score, and total.');
+      return;
+    }
 
-  loadAssessmentsFromSheet();
+    const assessment = {
+      subject: document.getElementById('f-subj').value,
+      quarter: document.getElementById('f-qtr').value,
+      type: document.getElementById('f-type').value,
+      title: title,
+      score: score,
+      total: total,
+      date: document.getElementById('f-date').value.trim(),
+      notes: document.getElementById('f-notes').value.trim()
+    };
 
-  closeModal();
-});
-return;
-} 
-else if (currentModal === 'file') {
-    const title = document.getElementById('f-title').value.trim();
-    if (!title) { alert('Please enter a file name.'); return; }
-    state.files.push({ id:Date.now(), subj:document.getElementById('f-subj').value, quarter:document.getElementById('f-qtr').value, ftype:document.getElementById('f-ftype').value, title, link:document.getElementById('f-link').value.trim(), date:document.getElementById('f-date').value.trim(), notes:document.getElementById('f-notes').value.trim() });
-  } else if (currentModal === 'project') {
-    const title = document.getElementById('f-title').value.trim();
-    if (!title) { alert('Please enter a title.'); return; }
-    state.projects.push({ id:Date.now(), title, subj:document.getElementById('f-subj').value, quarter:document.getElementById('f-qtr').value, ptype:document.getElementById('f-ptype').value, status:document.getElementById('f-status').value, date:document.getElementById('f-date').value.trim(), notes:document.getElementById('f-notes').value.trim() });
+    fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
+      method: 'POST',
+      body: JSON.stringify(assessment)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log('Saved to sheet:', data);
+
+      loadAssessmentsFromSheet();
+
+      closeModal();
+    });
+
+    return;
   }
-  save(); closeModal(); refreshCurrent();
+
+  else if (currentModal === 'file') {
+
+    const title = document.getElementById('f-title').value.trim();
+
+    if (!title) {
+      alert('Please enter a file name.');
+      return;
+    }
+
+    state.files.push({
+      id: Date.now(),
+      subj: document.getElementById('f-subj').value,
+      quarter: document.getElementById('f-qtr').value,
+      ftype: document.getElementById('f-ftype').value,
+      title
+    });
+
+  }
+
+  else if (currentModal === 'project') {
+
+    const title = document.getElementById('f-title').value.trim();
+
+    if (!title) {
+      alert('Please enter a title.');
+      return;
+    }
+
+    state.projects.push({
+      id: Date.now(),
+      title,
+      subj: document.getElementById('f-subj').value,
+      quarter: document.getElementById('f-qtr').value
+    });
+
+  }
+
+  save();
+  closeModal();
+  refreshCurrent();
 }
 
 function closeModal() { document.getElementById('modal').classList.remove('open'); currentModal = null; }
