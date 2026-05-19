@@ -495,34 +495,82 @@ function saveEntry() {
       notes: document.getElementById('f-notes').value.trim()
     };
 
-fetch('https://script.google.com/macros/s/AKfycby6pbfi5tJVm_5CvCUU5g2Srr67YVhEfbXQk0VNXONlfoOzqX9MF1O0HYhERhFTAvwzKA/exec', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'text/plain;charset=utf-8'
-  },
-  body: JSON.stringify(assessment)
-})
-.then(res => res.text())
-.then(text => {
+    fetch('YOUR_WEBAPP_URL_HERE', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(assessment)
+    })
+    .then(res => res.text())
+    .then(text => {
 
-  console.log('RAW RESPONSE:', text);
+      console.log(text);
 
-  let data;
+      return loadAssessmentsFromSheet();
 
-  try {
-    data = JSON.parse(text);
-  } catch(e) {
-    throw new Error('Invalid JSON response');
+    })
+    .then(() => {
+
+      refreshCurrent();
+
+      closeModal();
+
+    })
+    .catch(err => {
+
+      console.error(err);
+
+      alert('Failed to save.');
+
+    });
+
+    return;
   }
 
-  console.log('Saved to sheet:', data);
+  else if (currentModal === 'file') {
 
-  return loadAssessmentsFromSheet();
+    const title = document.getElementById('f-title').value.trim();
 
-})
-.then(() => {
+    if (!title) {
+      alert('Please enter a file name.');
+      return;
+    }
+
+    state.files.push({
+      id: Date.now(),
+      subj: document.getElementById('f-subj').value,
+      quarter: document.getElementById('f-qtr').value,
+      ftype: document.getElementById('f-ftype').value,
+      title
+    });
+
+  }
+
+  else if (currentModal === 'project') {
+
+    const title = document.getElementById('f-title').value.trim();
+
+    if (!title) {
+      alert('Please enter a title.');
+      return;
+    }
+
+    state.projects.push({
+      id: Date.now(),
+      title,
+      subj: document.getElementById('f-subj').value,
+      quarter: document.getElementById('f-qtr').value
+    });
+
+  }
+
+  save();
+
+  closeModal();
 
   refreshCurrent();
+}
 
   closeModal();
 
