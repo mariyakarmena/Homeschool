@@ -648,7 +648,13 @@ function showSubjTab(tab,el){document.querySelectorAll('#subj-tabs .tab').forEac
 
 // BOOT
 gcalInit();
-Promise.all([loadAll(),loadCalEvents()]).then(()=>renderDashboard());
+
+Promise.all([
+  loadAll(),
+  loadCalEvents()
+]).then(() => {
+  renderDashboard();
+});
 </script>
 </body>
 </html>
