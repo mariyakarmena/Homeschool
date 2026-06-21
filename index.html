@@ -416,8 +416,8 @@ let state={assessments:[],files:[],projects:[],todos:[],currentPage:'dashboard',
 let calEvents={};
 let gcal={weekStart:null,pendingKey:null,pendingHour:null};
 
-try{const s=localStorage.getItem('hshub5');if(s){const d=JSON.parse(s);state.projects=d.projects||[];calEvents=d.calEvents||{};}}catch(e){}
-function saveLocal(){try{localStorage.setItem('hshub5',JSON.stringify({projects:state.projects,calEvents}));}catch(e){}}
+try{const s=localStorage.getItem('hshub5');if(s){const d=JSON.parse(s);state.projects=d.projects||[];}}catch(e){}
+function saveLocal(){try{localStorage.setItem('hshub5',JSON.stringify({projects:state.projects}));}catch(e){}}
 
 // CLOCK
 function updateClock(){const n=new Date();document.getElementById('ph-clock').textContent=n.toLocaleTimeString('en-PH',{timeZone:'Asia/Manila',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});document.getElementById('ph-date').textContent=n.toLocaleDateString('en-PH',{timeZone:'Asia/Manila',weekday:'short',year:'numeric',month:'short',day:'numeric'});}
@@ -430,6 +430,19 @@ const nA=a=>({...a,subj:a.subj||a.subject||'',pct:a.pct||Math.round((a.score/a.t
 const nF=f=>({...f,subj:f.subj||f.subject||''});
 const nT=t=>({...t,subj:t.subj||t.subject||''});
 async function loadAll(){try{const[a,f,t]=await Promise.all([gasGet(),gasGet({type:'files'}),gasGet({type:'todos'})]);state.assessments=Array.isArray(a)?a.map(nA):[];state.files=Array.isArray(f)?f.map(nF):[];state.todos=Array.isArray(t)?t.map(nT):[];refreshCurrent();}catch(e){console.error(e);}}
+async function loadCalEvents(){
+  try{
+    const data=await gasGet({type:'calevents'});
+    if(!Array.isArray(data))return;
+    calEvents={};
+    data.forEach(ev=>{
+      if(!ev.datekey)return;
+      if(!calEvents[ev.datekey])calEvents[ev.datekey]=[];
+      calEvents[ev.datekey].push({id:String(ev.id),title:ev.title||'',start:ev.start||'',end:ev.end||'',color:ev.color||'#1D9E75',allDay:ev.allday==='TRUE'||ev.allday===true});
+    });
+    renderGcal();
+  }catch(e){console.error('loadCalEvents',e);}
+}
 
 // QUARTER
 function setGlobalQtr(q,el){state.globalQtr=q;document.querySelectorAll('#global-qtr-pills .qtr-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');refreshCurrent();}
@@ -544,15 +557,30 @@ function gcalOpenAdd(key,hour){
   setTimeout(()=>document.getElementById('gcal-ev-title').focus(),50);
 }
 function gcalClose(){gcal.pendingKey=null;document.getElementById('gcal-add-panel').classList.remove('open');}
-function gcalSave(){
+async function gcalSave(){
   const title=document.getElementById('gcal-ev-title').value.trim();if(!title){document.getElementById('gcal-ev-title').focus();return;}
   const key=gcal.pendingKey;if(!key)return;
   const start=document.getElementById('gcal-ev-start').value,end=document.getElementById('gcal-ev-end').value,color=nextColor();
+  const newId=String(Date.now());
+  // Optimistic update
   if(!calEvents[key])calEvents[key]=[];
-  calEvents[key].push({id:String(Date.now()),title,start,end,color});
-  saveLocal();gcalClose();renderGcal();
+  calEvents[key].push({id:newId,title,start,end,color,allDay:false});
+  gcalClose();renderGcal();
+  // Persist to GAS
+  try{await gasPost({mode:'calevent-add',id:newId,datekey:key,title,start,end,color,allDay:false});}catch(e){console.error(e);}
+  loadCalEvents();
 }
-function gcalDel(e,key,id){e.stopPropagation();if(!confirm('Remove this event?'))return;calEvents[key]=(calEvents[key]||[]).filter(x=>x.id!==id);if(!calEvents[key].length)delete calEvents[key];saveLocal();renderGcal();}
+async function gcalDel(e,key,id){
+  e.stopPropagation();
+  if(!confirm('Remove this event?'))return;
+  // Optimistic update
+  calEvents[key]=(calEvents[key]||[]).filter(x=>x.id!==id);
+  if(!calEvents[key].length)delete calEvents[key];
+  renderGcal();
+  // Persist to GAS
+  try{await gasPost({mode:'calevent-delete',id});}catch(e){console.error(e);}
+  loadCalEvents();
+}
 setInterval(()=>{if(state.currentPage==='dashboard')renderGcal();},60000);
 
 // SCHEDULE
@@ -620,7 +648,7 @@ function showSubjTab(tab,el){document.querySelectorAll('#subj-tabs .tab').forEac
 
 // BOOT
 gcalInit();
-loadAll().then(()=>renderDashboard());
+Promise.all([loadAll(),loadCalEvents()]).then(()=>renderDashboard());
 </script>
 </body>
 </html>
