@@ -262,55 +262,66 @@
   <!-- DASHBOARD -->
   <div class="content page active" id="page-dashboard">
 
-    <!-- Full-width weekly calendar -->
-    <div class="gcal" id="gcal-wrap">
-      <div class="gcal-bar">
-        <button class="gcal-today-btn" onclick="gcalGoToday()">Today</button>
-        <button class="gcal-nav-btn" onclick="gcalNav(-1)"><i class="ti ti-chevron-left"></i></button>
-        <button class="gcal-nav-btn" onclick="gcalNav(1)"><i class="ti ti-chevron-right"></i></button>
-        <span class="gcal-month-lbl" id="gcal-lbl"></span>
-        <span class="gcal-hint">Click any time slot to add an event · Click an event to delete it</span>
+    <!-- Main 2-col: left panel 1/3, calendar 2/3 -->
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:start;margin-bottom:16px">
+
+      <!-- LEFT PANEL: Schedule + To-Dos -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Class Schedule -->
+        <div>
+          <div class="section-header"><div class="section-title"><i class="ti ti-calendar-week"></i> Class Schedule</div></div>
+          <div class="card" style="margin-bottom:0"><div class="card-inner" style="padding:10px"><div class="sched-grid" id="sched-grid"></div></div></div>
+        </div>
+
+        <!-- To-Dos -->
+        <div>
+          <div class="section-header">
+            <div class="section-title"><i class="ti ti-list-check"></i> To-Dos</div>
+            <button class="btn btn-sm" onclick="openAddTodo(null)"><i class="ti ti-plus"></i> Add</button>
+          </div>
+          <div class="card" style="margin-bottom:0"><div id="dash-todo-list"><div class="empty-state" style="padding:20px"><i class="ti ti-list-check"></i>No to-dos yet</div></div></div>
+        </div>
+
       </div>
-      <div class="gcal-head" id="gcal-head"></div>
-      <div class="gcal-allday-row" id="gcal-allday"></div>
-      <div class="gcal-body" id="gcal-body">
-        <div class="gcal-time-col" id="gcal-timecol"></div>
-        <div class="gcal-day-cols" id="gcal-daycols"></div>
-      </div>
-      <div class="gcal-add-panel" id="gcal-add-panel">
-        <span class="gcal-add-date-chip" id="gcal-add-chip"></span>
-        <input type="text" id="gcal-ev-title" placeholder="Event title, e.g. Soccer practice" onkeydown="if(event.key==='Enter')gcalSave()">
-        <input type="time" id="gcal-ev-start">
-        <span class="gcal-add-sep">to</span>
-        <input type="time" id="gcal-ev-end">
-        <button class="btn btn-primary btn-sm" onclick="gcalSave()"><i class="ti ti-check"></i> Save</button>
-        <button class="btn btn-sm" onclick="gcalClose()"><i class="ti ti-x"></i></button>
+
+      <!-- RIGHT PANEL: Weekly Calendar (2/3) -->
+      <div class="gcal" id="gcal-wrap">
+        <div class="gcal-bar">
+          <button class="gcal-today-btn" onclick="gcalGoToday()">Today</button>
+          <button class="gcal-nav-btn" onclick="gcalNav(-1)"><i class="ti ti-chevron-left"></i></button>
+          <button class="gcal-nav-btn" onclick="gcalNav(1)"><i class="ti ti-chevron-right"></i></button>
+          <span class="gcal-month-lbl" id="gcal-lbl"></span>
+          <span class="gcal-hint">Click a time slot to add · Click event to delete</span>
+        </div>
+        <div class="gcal-head" id="gcal-head"></div>
+        <div class="gcal-allday-row" id="gcal-allday"></div>
+        <div class="gcal-body" id="gcal-body">
+          <div class="gcal-time-col" id="gcal-timecol"></div>
+          <div class="gcal-day-cols" id="gcal-daycols"></div>
+        </div>
+        <div class="gcal-add-panel" id="gcal-add-panel">
+          <span class="gcal-add-date-chip" id="gcal-add-chip"></span>
+          <input type="text" id="gcal-ev-title" placeholder="Event title, e.g. Soccer practice" onkeydown="if(event.key==='Enter')gcalSave()">
+          <input type="time" id="gcal-ev-start">
+          <span class="gcal-add-sep">to</span>
+          <input type="time" id="gcal-ev-end">
+          <button class="btn btn-primary btn-sm" onclick="gcalSave()"><i class="ti ti-check"></i> Save</button>
+          <button class="btn btn-sm" onclick="gcalClose()"><i class="ti ti-x"></i></button>
+        </div>
       </div>
     </div>
 
-    <!-- Class Schedule + To-Dos + Recent Activity -->
-    <div class="three-col" style="margin-bottom:16px;align-items:start">
-      <div>
-        <div class="section-header"><div class="section-title"><i class="ti ti-calendar-week"></i> Class Schedule</div></div>
-        <div class="card" style="margin-bottom:0"><div class="card-inner" style="padding:10px"><div class="sched-grid" id="sched-grid"></div></div></div>
-      </div>
-      <div>
-        <div class="section-header">
-          <div class="section-title"><i class="ti ti-list-check"></i> To-Dos</div>
-          <button class="btn btn-sm" onclick="openAddTodo(null)"><i class="ti ti-plus"></i> Add</button>
-        </div>
-        <div class="card"><div id="dash-todo-list"><div class="empty-state" style="padding:20px"><i class="ti ti-list-check"></i>No to-dos yet</div></div></div>
-      </div>
+    <!-- Recent Activity + Projects -->
+    <div class="two-col" style="margin-bottom:16px">
       <div>
         <div class="section-header"><div class="section-title"><i class="ti ti-clock"></i> Recent Activity</div></div>
         <div class="card"><div id="recent-list"><div class="empty-state"><i class="ti ti-clock"></i>No entries yet</div></div></div>
       </div>
-    </div>
-
-    <!-- Projects -->
-    <div>
-      <div class="section-header"><div class="section-title"><i class="ti ti-checks"></i> Projects</div></div>
-      <div class="card"><div class="card-inner" id="proj-dash-list"><div class="empty-state"><i class="ti ti-checks"></i>No projects yet</div></div></div>
+      <div>
+        <div class="section-header"><div class="section-title"><i class="ti ti-checks"></i> Projects</div></div>
+        <div class="card"><div class="card-inner" id="proj-dash-list"><div class="empty-state"><i class="ti ti-checks"></i>No projects yet</div></div></div>
+      </div>
     </div>
   </div>
 
@@ -558,28 +569,46 @@ function gcalOpenAdd(key,hour){
 }
 function gcalClose(){gcal.pendingKey=null;document.getElementById('gcal-add-panel').classList.remove('open');}
 async function gcalSave(){
-  const title=document.getElementById('gcal-ev-title').value.trim();if(!title){document.getElementById('gcal-ev-title').focus();return;}
-  const key=gcal.pendingKey;if(!key)return;
-  const start=document.getElementById('gcal-ev-start').value,end=document.getElementById('gcal-ev-end').value,color=nextColor();
+  const title=document.getElementById('gcal-ev-title').value.trim();
+  if(!title){document.getElementById('gcal-ev-title').focus();return;}
+  const key=gcal.pendingKey;
+  if(!key)return;
+  const start=document.getElementById('gcal-ev-start').value;
+  const end=document.getElementById('gcal-ev-end').value;
+  const color=nextColor();
   const newId=String(Date.now());
-  // Optimistic update
+  // Optimistic local update so UI feels instant
   if(!calEvents[key])calEvents[key]=[];
   calEvents[key].push({id:newId,title,start,end,color,allDay:false});
-  gcalClose();renderGcal();
-  // Persist to GAS
-  try{await gasPost({mode:'calevent-add',id:newId,datekey:key,title,start,end,color,allDay:false});}catch(e){console.error(e);}
-  loadCalEvents();
+  gcalClose();
+  renderGcal();
+  // Save to Google Sheet via GAS
+  try{
+    const payload={mode:'calevent-add',id:newId,datekey:key,title,start,end,color,allDay:false};
+    const res=await gasPost(payload);
+    console.log('calevent-add response:',res);
+  }catch(e){
+    console.error('Failed to save calendar event:',e);
+    alert('Event saved locally but could not reach Google Sheets. Check your GAS deployment.');
+  }
+  // Reload from sheet after a short delay to sync
+  setTimeout(loadCalEvents,1500);
 }
 async function gcalDel(e,key,id){
   e.stopPropagation();
   if(!confirm('Remove this event?'))return;
-  // Optimistic update
+  // Optimistic local update
   calEvents[key]=(calEvents[key]||[]).filter(x=>x.id!==id);
   if(!calEvents[key].length)delete calEvents[key];
   renderGcal();
-  // Persist to GAS
-  try{await gasPost({mode:'calevent-delete',id});}catch(e){console.error(e);}
-  loadCalEvents();
+  // Delete from Google Sheet
+  try{
+    const res=await gasPost({mode:'calevent-delete',id});
+    console.log('calevent-delete response:',res);
+  }catch(e){
+    console.error('Failed to delete calendar event:',e);
+  }
+  setTimeout(loadCalEvents,1500);
 }
 setInterval(()=>{if(state.currentPage==='dashboard')renderGcal();},60000);
 
