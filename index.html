@@ -38,6 +38,20 @@
   .nav-item.active{background:var(--color-accent-light);color:var(--color-accent-dark);font-weight:500;}
   .nav-item i{font-size:15px;width:18px;text-align:center;}
   .subject-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .sidebar-mini-cal{padding:12px 14px;border-top:0.5px solid var(--color-border);}
+  .mini-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .mini-cal-title{font-size:13px;font-weight:600;}
+  .mini-cal-nav{display:flex;gap:4px;}
+  .mini-cal-btn{width:24px;height:24px;border:none;background:transparent;border-radius:var(--radius-md);color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .mini-cal-btn:hover{background:var(--color-surface-secondary);color:var(--color-text);}
+  .mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;}
+  .mini-cal-dow{font-size:10px;font-weight:600;color:var(--color-text-secondary);padding-bottom:3px;}
+  .mini-cal-day{height:25px;border-radius:50%;border:none;background:transparent;color:var(--color-text);font-size:11px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .mini-cal-day:hover{background:var(--color-surface-secondary);}
+  .mini-cal-day.outside{color:var(--color-text-tertiary);}
+  .mini-cal-day.today{background:var(--color-surface-secondary);font-weight:600;}
+  .mini-cal-day.selected{background:var(--color-accent);color:#fff;font-weight:600;}
+  .mini-cal-day.in-week:not(.selected){box-shadow:inset 0 0 0 1px var(--color-accent);}
   .sidebar-clock{padding:10px 14px 14px;border-top:0.5px solid var(--color-border);}
   .clock-label{font-size:9px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;}
   .clock-time{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.5px;}
@@ -143,7 +157,7 @@
   .sched-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 
   /* ── GOOGLE CALENDAR WEEKLY VIEW ─────────────── */
-  .gcal{background:var(--color-surface);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;display:flex;flex-direction:column;}
+  .gcal{background:var(--color-surface);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;display:flex;flex-direction:column;min-height:calc(100vh - 92px);}
   /* toolbar */
   .gcal-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:0.5px solid var(--color-border);flex-shrink:0;}
   .gcal-month-lbl{font-size:15px;font-weight:600;min-width:220px;}
@@ -166,14 +180,14 @@
   .gcal-allday-cell{border-left:0.5px solid var(--color-border);padding:2px;}
   .gcal-allday-ev{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;cursor:pointer;}
   /* scrollable time grid */
-  .gcal-body{display:flex;overflow-y:auto;height:440px;flex-shrink:0;}
+  .gcal-body{display:flex;overflow:hidden;flex:1;min-height:560px;--slot-h:24px;}
   .gcal-time-col{width:52px;flex-shrink:0;border-right:0.5px solid var(--color-border);}
-  .gcal-time-slot{height:48px;display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 6px 0;}
+  .gcal-time-slot{height:var(--slot-h);display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 6px 0;}
   .gcal-time-slot span{font-size:10px;color:var(--color-text-tertiary);}
   .gcal-day-cols{flex:1;display:grid;grid-template-columns:repeat(7,1fr);position:relative;}
   .gcal-day-col{border-left:0.5px solid var(--color-border);position:relative;}
   .gcal-day-col.is-today{background:rgba(29,158,117,0.025);}
-  .gcal-hour-cell{height:48px;border-bottom:0.5px solid var(--color-border);cursor:pointer;transition:background .1s;position:relative;}
+  .gcal-hour-cell{height:var(--slot-h);border-bottom:0.5px solid var(--color-border);cursor:pointer;transition:background .1s;position:relative;}
   .gcal-hour-cell:last-child{border-bottom:none;}
   .gcal-hour-cell:hover{background:rgba(29,158,117,0.07);}
   .gcal-half-line{position:absolute;top:50%;left:0;right:0;height:0.5px;background:var(--color-border);opacity:.5;pointer-events:none;}
@@ -199,9 +213,10 @@
     .nav-item{justify-content:center;padding:10px;}
     .two-col,.three-col{grid-template-columns:1fr;}
     .qtr-summary-grid{grid-template-columns:repeat(2,1fr);}
-    .qtr-pills,.sidebar-clock{display:none;}
+    .qtr-pills,.sidebar-clock,.sidebar-mini-cal{display:none;}
     .sched-grid{grid-template-columns:1fr 1fr;}
-    .gcal-body{height:300px;}
+    .gcal{min-height:auto;}
+    .gcal-body{min-height:520px;}
   }
 </style>
 </head>
@@ -239,6 +254,16 @@
     <div class="nav-section">Records</div>
     <div class="nav-item" onclick="showPage('files',this)"><i class="ti ti-folder"></i><span>Files &amp; Workbooks</span></div>
     <div class="nav-item" onclick="showPage('projects',this)"><i class="ti ti-checks"></i><span>Projects</span></div>
+  </div>
+  <div class="sidebar-mini-cal" id="mini-cal">
+    <div class="mini-cal-head">
+      <div class="mini-cal-title" id="mini-cal-title">Month</div>
+      <div class="mini-cal-nav">
+        <button class="mini-cal-btn" onclick="miniCalNav(-1)" title="Previous month"><i class="ti ti-chevron-left"></i></button>
+        <button class="mini-cal-btn" onclick="miniCalNav(1)" title="Next month"><i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>
+    <div class="mini-cal-grid" id="mini-cal-grid"></div>
   </div>
   <div class="sidebar-clock">
     <div class="clock-label">Philippine Time</div>
@@ -423,11 +448,11 @@ const DOWS_F=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Satur
 const SCHED={Monday:['Faith','English','Filipino','Spelling','PE'],Tuesday:['Faith','Math','Science','Aral Pan','Health'],Wednesday:['Faith','English','Filipino','Spelling','Music'],Thursday:['Faith','Math','Science','Aral Pan','Arts'],Friday:['GMRC','Computer']};
 const EV_COLORS=['#1D9E75','#378ADD','#D85A30','#C0408A','#7F77DD','#EF9F27','#E24B4A','#D4537E'];
 let evCI=0; const nextColor=()=>EV_COLORS[evCI++%EV_COLORS.length];
-const SLOT_H=48;
+let SLOT_H=48;
 
 let state={assessments:[],files:[],projects:[],todos:[],currentPage:'dashboard',currentSubject:null,globalQtr:'All'};
 let calEvents={};
-let gcal={weekStart:null,pendingKey:null,pendingHour:null};
+let gcal={weekStart:null,selectedDate:null,miniMonth:null,pendingKey:null,pendingHour:null};
 
 try{const s=localStorage.getItem('hshub5');if(s){const d=JSON.parse(s);state.projects=d.projects||[];}}catch(e){}
 function saveLocal(){try{localStorage.setItem('hshub5',JSON.stringify({projects:state.projects}));}catch(e){}}
@@ -545,13 +570,51 @@ function closeModalOutside(e){if(e.target.id==='modal')closeModal();}
 
 // ════ GCAL ════
 function gcalWeekStart(from){const d=new Date(from);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;}
-function gcalInit(){gcal.weekStart=gcalWeekStart(nowPH());renderGcal();}
-function gcalNav(dir){gcal.weekStart=new Date(gcal.weekStart);gcal.weekStart.setDate(gcal.weekStart.getDate()+dir*7);gcalClose();renderGcal();}
-function gcalGoToday(){gcal.weekStart=gcalWeekStart(nowPH());gcalClose();renderGcal();}
+function gcalSetDate(date){
+  const d=new Date(date);
+  d.setHours(0,0,0,0);
+  gcal.selectedDate=d;
+  gcal.weekStart=gcalWeekStart(d);
+  gcal.miniMonth=new Date(d.getFullYear(),d.getMonth(),1);
+}
+function gcalInit(){gcalSetDate(nowPH());renderGcal();}
+function gcalNav(dir){const d=new Date(gcal.selectedDate||gcal.weekStart||nowPH());d.setDate(d.getDate()+dir*7);gcalSetDate(d);gcalClose();renderGcal();}
+function gcalGoToday(){gcalSetDate(nowPH());gcalClose();renderGcal();}
+function miniCalNav(dir){const base=gcal.miniMonth||gcal.selectedDate||nowPH();gcal.miniMonth=new Date(base.getFullYear(),base.getMonth()+dir,1);renderMiniCal();}
+function miniCalPick(key){const[y,m,d]=key.split('-').map(Number);gcalSetDate(new Date(y,m-1,d));gcalClose();renderGcal();}
+function renderMiniCal(){
+  const grid=document.getElementById('mini-cal-grid'),title=document.getElementById('mini-cal-title');
+  if(!grid||!title)return;
+  const base=gcal.miniMonth||gcal.selectedDate||nowPH();
+  const monthStart=new Date(base.getFullYear(),base.getMonth(),1);
+  const first=new Date(monthStart);first.setDate(first.getDate()-first.getDay());
+  const selectedK=dKey(gcal.selectedDate||nowPH()),todayK=dKey(nowPH());
+  const weekStart=gcal.weekStart||gcalWeekStart(gcal.selectedDate||nowPH());
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
+  title.textContent=monthStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const dows=DOWS_S.map(d=>`<div class="mini-cal-dow">${d.slice(0,1)}</div>`).join('');
+  const days=Array.from({length:42},(_,i)=>{
+    const d=new Date(first);d.setDate(first.getDate()+i);
+    const k=dKey(d),outside=d.getMonth()!==monthStart.getMonth(),selected=k===selectedK,today=k===todayK,inWeek=d>=weekStart&&d<=weekEnd;
+    return`<button class="mini-cal-day${outside?' outside':''}${today?' today':''}${selected?' selected':''}${inWeek?' in-week':''}" onclick="miniCalPick('${k}')" title="${d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}">${d.getDate()}</button>`;
+  }).join('');
+  grid.innerHTML=dows+days;
+}
+function fitGcalSlots(){
+  const body=document.getElementById('gcal-body');
+  if(!body)return;
+  SLOT_H=Math.max(20,Math.floor(body.clientHeight/24));
+  body.style.setProperty('--slot-h',SLOT_H+'px');
+}
 
 function renderGcal(){
   const ws=gcal.weekStart,now=nowPH(),todK=dKey(now);
   const days=Array.from({length:7},(_,i)=>{const d=new Date(ws);d.setDate(ws.getDate()+i);return d;});
+  renderMiniCal();
+  requestAnimationFrame(()=>{fitGcalSlots();renderGcalCells(days,now,todK);});
+}
+
+function renderGcalCells(days,now,todK){
   // label
   const m1=days[0].toLocaleDateString('en-US',{month:'long'}),m2=days[6].toLocaleDateString('en-US',{month:'long'}),yr=days[6].getFullYear();
   document.getElementById('gcal-lbl').textContent=m1===m2?`${m1} ${days[0].getDate()} – ${days[6].getDate()}, ${yr}`:`${m1} ${days[0].getDate()} – ${m2} ${days[6].getDate()}, ${yr}`;
@@ -570,18 +633,16 @@ function renderGcal(){
     const evBlocks=tevs.map(ev=>{
       const start=cleanTime(ev.start),end=cleanTime(ev.end);
       const[sh,sm]=start.split(':').map(Number);
-      const top=sh*SLOT_H+sm*0.8;
-      let h=SLOT_H;if(end){const[eh,em]=end.split(':').map(Number);h=Math.max(18,(eh*60+em-sh*60-sm)*0.8);}
+      const pxPerMin=SLOT_H/60;
+      const top=sh*SLOT_H+sm*pxPerMin;
+      let h=SLOT_H;if(end){const[eh,em]=end.split(':').map(Number);h=Math.max(18,(eh*60+em-sh*60-sm)*pxPerMin);}
       const col=ev.color||'#1D9E75';
       const tl=end?`${fmt12(start)} – ${fmt12(end)}`:fmt12(start);
       return`<div class="gcal-ev" style="top:${top}px;height:${h}px;background:${col}1A;color:${col};border-left-color:${col}" onclick="gcalDel(event,'${k}','${ev.id}')" title="${ev.title} · ${tl}"><div class="gcal-ev-title">${ev.title}</div>${h>28?`<div class="gcal-ev-time">${tl}</div>`:''}</div>`;
     }).join('');
-    let nl='';if(tod){const px=(now.getHours()*60+now.getMinutes())*0.8;nl=`<div class="gcal-now-line" style="top:${px}px"></div>`;}
+    let nl='';if(tod){const px=(now.getHours()*60+now.getMinutes())*(SLOT_H/60);nl=`<div class="gcal-now-line" style="top:${px}px"></div>`;}
     return`<div class="gcal-day-col${tod?' is-today':''}">${cells}${evBlocks}${nl}</div>`;
   }).join('');
-  // scroll to 7am once
-  const body=document.getElementById('gcal-body');
-  if(body&&!body.dataset.scrolled){body.scrollTop=7*SLOT_H;body.dataset.scrolled='1';}
 }
 
 function gcalOpenAdd(key,hour){
@@ -771,6 +832,7 @@ function showSubjTab(tab,el){document.querySelectorAll('#subj-tabs .tab').forEac
 // BOOT
 gcalInit();
 Promise.all([loadAll(),loadCalEvents()]).then(()=>renderDashboard());
+window.addEventListener('resize',()=>{if(state.currentPage==='dashboard')renderGcal();});
 </script>
 </body>
 </html>
