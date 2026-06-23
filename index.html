@@ -349,14 +349,12 @@
     </div>
     <div class="tab-bar" id="subj-tabs">
       <div class="tab active" onclick="showSubjTab('todos',this)">To-Dos</div>
-      <div class="tab" onclick="showSubjTab('books',this)">Books</div>
       <div class="tab" onclick="showSubjTab('quizzes',this)">Quizzes</div>
       <div class="tab" onclick="showSubjTab('exams',this)">Exams</div>
       <div class="tab" onclick="showSubjTab('activities',this)">Activities</div>
       <div class="tab" onclick="showSubjTab('subj-files',this)">Files &amp; Workbooks</div>
     </div>
     <div class="tab-content active" id="tab-todos"></div>
-    <div class="tab-content" id="tab-books"></div>
     <div class="tab-content" id="tab-quizzes"></div>
     <div class="tab-content" id="tab-exams"></div>
     <div class="tab-content" id="tab-activities"></div>
@@ -448,11 +446,19 @@ async function loadCalEvents(){
     calEvents={};
     data.forEach(ev=>{
       if(!ev.datekey)return;
-      if(!calEvents[ev.datekey])calEvents[ev.datekey]=[];
-      calEvents[ev.datekey].push({id:String(ev.id),title:ev.title||'',start:ev.start||'',end:ev.end||'',color:ev.color||'#1D9E75',allDay:ev.allday==='TRUE'||ev.allday===true});
+      const k=String(ev.datekey).trim();
+      if(!calEvents[k])calEvents[k]=[];
+      calEvents[k].push({
+        id:String(ev.id),
+        title:String(ev.title||''),
+        start:String(ev.start||''),
+        end:String(ev.end||''),
+        color:String(ev.color||'#1D9E75'),
+        allDay:ev.allday===true||String(ev.allday).toUpperCase()==='TRUE'
+      });
     });
     renderGcal();
-  }catch(e){console.error('loadCalEvents',e);}
+  }catch(e){console.error('loadCalEvents error:',e);}
 }
 
 // QUARTER
@@ -568,47 +574,50 @@ function gcalOpenAdd(key,hour){
   setTimeout(()=>document.getElementById('gcal-ev-title').focus(),50);
 }
 function gcalClose(){gcal.pendingKey=null;document.getElementById('gcal-add-panel').classList.remove('open');}
+
 async function gcalSave(){
   const title=document.getElementById('gcal-ev-title').value.trim();
   if(!title){document.getElementById('gcal-ev-title').focus();return;}
   const key=gcal.pendingKey;
-  if(!key)return;
+  if(!key){alert('No date selected.');return;}
   const start=document.getElementById('gcal-ev-start').value;
   const end=document.getElementById('gcal-ev-end').value;
   const color=nextColor();
   const newId=String(Date.now());
-  // Optimistic local update so UI feels instant
+
+  // 1. Add to local state immediately so UI shows it
   if(!calEvents[key])calEvents[key]=[];
   calEvents[key].push({id:newId,title,start,end,color,allDay:false});
   gcalClose();
   renderGcal();
-  // Save to Google Sheet via GAS
+
+  // 2. Save to GAS (no setTimeout - we await it directly)
   try{
-    const payload={mode:'calevent-add',id:newId,datekey:key,title,start,end,color,allDay:false};
-    const res=await gasPost(payload);
-    console.log('calevent-add response:',res);
+    const raw=await gasPost({mode:'calevent-add',id:newId,datekey:key,title,start,end,color,allDay:false});
+    const resp=JSON.parse(raw);
+    if(!resp.success){
+      console.error('GAS calevent-add failed:',resp.error);
+      alert('Could not save event to Google Sheets: '+resp.error);
+    }
   }catch(e){
-    console.error('Failed to save calendar event:',e);
-    alert('Event saved locally but could not reach Google Sheets. Check your GAS deployment.');
+    console.error('gcalSave network error:',e);
+    alert('Network error saving event. Please check your GAS deployment URL and redeploy.');
   }
-  // Reload from sheet after a short delay to sync
-  setTimeout(loadCalEvents,1500);
 }
+
 async function gcalDel(e,key,id){
   e.stopPropagation();
   if(!confirm('Remove this event?'))return;
-  // Optimistic local update
+  // Remove locally first
   calEvents[key]=(calEvents[key]||[]).filter(x=>x.id!==id);
-  if(!calEvents[key].length)delete calEvents[key];
+  if(calEvents[key]&&!calEvents[key].length)delete calEvents[key];
   renderGcal();
-  // Delete from Google Sheet
+  // Delete from GAS
   try{
-    const res=await gasPost({mode:'calevent-delete',id});
-    console.log('calevent-delete response:',res);
-  }catch(e){
-    console.error('Failed to delete calendar event:',e);
-  }
-  setTimeout(loadCalEvents,1500);
+    const raw=await gasPost({mode:'calevent-delete',id});
+    const resp=JSON.parse(raw);
+    if(!resp.success)console.error('GAS calevent-delete failed:',resp.error);
+  }catch(e){console.error('gcalDel error:',e);}
 }
 setInterval(()=>{if(state.currentPage==='dashboard')renderGcal();},60000);
 
@@ -647,7 +656,7 @@ function renderGradeReport(){
 }
 
 // SUBJECT PAGE
-function renderSubjectPage(s){if(!s)return;const c=SC[s]||'#888',ic=SI[s]||'ti-book',el=document.getElementById('subj-icon-display');el.innerHTML=`<i class="ti ${ic}" style="font-size:18px;color:${c}"></i>`;el.style.background=c+'22';document.getElementById('subj-title-display').textContent=s;const a=sAvg(s,null),fi=fAvg(s),pts=[];if(state.globalQtr!=='All')pts.push(`${state.globalQtr} avg: ${a!==null?a+'%':'—'}`);if(fi!==null)pts.push(`Final avg: ${fi}%`);document.getElementById('subj-avg-display').textContent=pts.join(' · ')||'No assessments yet';document.querySelectorAll('#subj-tabs .tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelector('#subj-tabs .tab').classList.add('active');document.getElementById('tab-todos').classList.add('active');renderSubjTodos(s);renderBooks(s);renderATab(s,'Quiz','tab-quizzes');renderATab(s,'Exam','tab-exams');renderATab(s,'Activity','tab-activities');renderSubjFiles(s);}
+function renderSubjectPage(s){if(!s)return;const c=SC[s]||'#888',ic=SI[s]||'ti-book',el=document.getElementById('subj-icon-display');el.innerHTML=`<i class="ti ${ic}" style="font-size:18px;color:${c}"></i>`;el.style.background=c+'22';document.getElementById('subj-title-display').textContent=s;const a=sAvg(s,null),fi=fAvg(s),pts=[];if(state.globalQtr!=='All')pts.push(`${state.globalQtr} avg: ${a!==null?a+'%':'—'}`);if(fi!==null)pts.push(`Final avg: ${fi}%`);document.getElementById('subj-avg-display').textContent=pts.join(' · ')||'No assessments yet';document.querySelectorAll('#subj-tabs .tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelector('#subj-tabs .tab').classList.add('active');document.getElementById('tab-todos').classList.add('active');renderSubjTodos(s);renderATab(s,'Quiz','tab-quizzes');renderATab(s,'Exam','tab-exams');renderATab(s,'Activity','tab-activities');renderSubjFiles(s);}
 
 // TO-DOs
 function renderTodoItem(t){const tm={Task:'badge-blue',Note:'badge-gray',Reminder:'badge-amber'};const cls=tm[t.todotype]||'badge-gray';const ac=t.addedby==='Mommy'?'badge-mommy':t.addedby==='Daddy'?'badge-daddy':'';const ab=t.addedby?`<span class="badge ${ac}" style="font-size:10px;padding:1px 6px">${t.addedby}</span>`:'';return`<div class="todo-item" id="todo-${t.id}"><input type="checkbox" class="todo-check" ${t.done?'checked':''} onchange="toggleTodo('${t.id}')"><div style="flex:1;min-width:0"><div class="todo-text ${t.done?'done':''}">${t.title}${t.subj?`<span style="font-size:11px;color:${SC[t.subj]||'var(--color-text-secondary)'};margin-left:6px">${t.subj}</span>`:''}</div>${t.notes?`<div class="todo-note">${t.notes.replace(/\n/g,'<br>')}</div>`:''}<div class="todo-meta">${t.quarter}${t.date?' · Due '+fmtD(t.date):''} · <span class="badge ${cls}" style="font-size:10px;padding:1px 6px">${t.todotype}</span> ${ab}</div></div><div class="todo-actions"><button class="icon-btn" onclick="openAddTodo(null,state.todos.find(x=>String(x.id)==='${t.id}'))" title="Edit"><i class="ti ti-pencil"></i></button><button class="icon-btn" onclick="deleteTodo('${t.id}')" title="Delete"><i class="ti ti-trash"></i></button></div></div>`;}
@@ -656,8 +665,68 @@ function renderAllTodos(){const p=state.todos.filter(t=>!t.done),d=state.todos.f
 async function toggleTodo(id){const t=state.todos.find(x=>String(x.id)===String(id));if(!t)return;t.done=!t.done;refreshCurrent();try{await gasPost({mode:'todo-toggle',id:String(id),done:t.done});}catch(e){}}
 async function deleteTodo(id){if(!confirm('Delete this to-do?'))return;state.todos=state.todos.filter(t=>String(t.id)!==String(id));refreshCurrent();try{await gasPost({mode:'todo-delete',id:String(id)});}catch(e){}}
 
-// ASSESS TABS
-function renderATab(s,type,tid){let it=state.assessments.filter(a=>a.subj===s&&a.type===type);if(state.globalQtr!=='All')it=it.filter(a=>a.quarter===state.globalQtr);const el=document.getElementById(tid);if(!it.length){el.innerHTML=`<div class="empty-state"><i class="ti ti-pencil"></i>No ${type.toLowerCase()}s${state.globalQtr!=='All'?' for '+state.globalQtr:''}</div>`;return;}el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th>Quarter</th><th>Title</th><th>Score</th><th>Total</th><th>%</th><th>Date</th><th>Uploaded by</th><th>Notes</th></tr></thead><tbody>${it.map(a=>{const pct=Math.round((a.score/a.total)*100),cls=pct>=90?'badge-teal':pct>=75?'badge-green':pct>=60?'badge-amber':'badge-red',uc=a.uploader==='Mommy'?'badge-mommy':a.uploader==='Daddy'?'badge-daddy':'badge-gray';return`<tr><td><span class="badge badge-purple">${a.quarter}</span></td><td>${a.title}</td><td>${a.score}</td><td>${a.total}</td><td><span class="badge ${cls}">${pct}%</span></td><td style="color:var(--color-text-secondary)">${fmtD(a.date)}</td><td>${a.uploader?`<span class="badge ${uc}">${a.uploader}</span>`:'<span style="color:var(--color-text-tertiary)">—</span>'}</td><td style="color:var(--color-text-secondary);font-size:12px">${a.notes||''}</td></tr>`;}).join('')}</tbody></table>`;}
+// ASSESS TABS — with photo upload
+function renderATab(s,type,tid){
+  let it=state.assessments.filter(a=>a.subj===s&&a.type===type);
+  if(state.globalQtr!=='All')it=it.filter(a=>a.quarter===state.globalQtr);
+  const el=document.getElementById(tid);
+  if(!it.length){el.innerHTML=`<div class="empty-state"><i class="ti ti-pencil"></i>No ${type.toLowerCase()}s${state.globalQtr!=='All'?' for '+state.globalQtr:''}</div>`;return;}
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr><th>Quarter</th><th>Title</th><th>Score</th><th>Total</th><th>%</th><th>Date</th><th>Uploaded by</th><th>Photo</th><th>Notes</th></tr></thead>
+    <tbody>${it.map(a=>{
+      const pct=Math.round((a.score/a.total)*100),
+            cls=pct>=90?'badge-teal':pct>=75?'badge-green':pct>=60?'badge-amber':'badge-red',
+            uc=a.uploader==='Mommy'?'badge-mommy':a.uploader==='Daddy'?'badge-daddy':'badge-gray';
+      const photoCell=a.photourl
+        ?`<td><a href="${a.photourl}" target="_blank" class="file-link" style="display:inline-flex;align-items:center;gap:4px"><i class="ti ti-photo" style="font-size:13px"></i> View</a></td>`
+        :`<td><label class="btn btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:3px 8px">
+            <i class="ti ti-upload" style="font-size:12px"></i> Upload
+            <input type="file" accept="image/*" style="display:none" onchange="uploadAssessPhoto(event,'${a.id}')">
+          </label></td>`;
+      return`<tr id="arow-${a.id}">
+        <td><span class="badge badge-purple">${a.quarter}</span></td>
+        <td>${a.title}</td><td>${a.score}</td><td>${a.total}</td>
+        <td><span class="badge ${cls}">${pct}%</span></td>
+        <td style="color:var(--color-text-secondary)">${fmtD(a.date)}</td>
+        <td>${a.uploader?`<span class="badge ${uc}">${a.uploader}</span>`:'<span style="color:var(--color-text-tertiary)">—</span>'}</td>
+        ${photoCell}
+        <td style="color:var(--color-text-secondary);font-size:12px">${a.notes||''}</td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+async function uploadAssessPhoto(event,assessId){
+  const file=event.target.files[0];
+  if(!file)return;
+  if(file.size>5*1024*1024){alert('Image too large. Please use an image under 5MB.');return;}
+  // Show uploading state
+  const row=document.getElementById('arow-'+assessId);
+  if(row){const cells=row.querySelectorAll('td');cells[7].innerHTML='<span style="font-size:12px;color:var(--color-text-secondary)">Uploading…</span>';}
+  // Convert to base64
+  const base64=await new Promise((res,rej)=>{
+    const reader=new FileReader();
+    reader.onload=e=>res(e.target.result.split(',')[1]);
+    reader.onerror=rej;
+    reader.readAsDataURL(file);
+  });
+  try{
+    const raw=await gasPost({mode:'assessment-photo',id:assessId,filename:file.name,mimetype:file.type,base64});
+    const resp=JSON.parse(raw);
+    if(resp.success&&resp.url){
+      // Update local state
+      const a=state.assessments.find(x=>String(x.id)===String(assessId));
+      if(a)a.photourl=resp.url;
+      // Update cell directly
+      if(row){const cells=row.querySelectorAll('td');cells[7].innerHTML=`<a href="${resp.url}" target="_blank" class="file-link" style="display:inline-flex;align-items:center;gap:4px"><i class="ti ti-photo" style="font-size:13px"></i> View</a>`;}
+    }else{
+      alert('Upload failed: '+(resp.error||'Unknown error'));
+      if(row){const cells=row.querySelectorAll('td');cells[7].innerHTML=`<label class="btn btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:3px 8px"><i class="ti ti-upload" style="font-size:12px"></i> Upload<input type="file" accept="image/*" style="display:none" onchange="uploadAssessPhoto(event,'${assessId}')"></label>`;}
+    }
+  }catch(e){
+    console.error('Photo upload error:',e);
+    alert('Network error during upload. Please try again.');
+  }
+}
 
 // FILES
 function fIH(f){const lh=f.link?`<a href="${f.link}" target="_blank" class="file-link"><i class="ti ti-external-link" style="font-size:12px"></i> Open link</a>`:'<span style="color:var(--color-text-tertiary);font-size:12px">No link</span>';return`<div class="file-item"><div class="file-icon" style="background:${(SC[f.subj]||'#888')+'22'}"><i class="ti ${f.ftype==='Book'?'ti-book':'ti-file'}" style="font-size:15px;color:${SC[f.subj]||'#888'}"></i></div><div style="flex:1;min-width:0"><div class="file-name">${f.title}</div><div class="file-meta">${f.ftype} · ${f.quarter||''} · ${fmtD(f.date)} ${f.notes?'· '+f.notes:''}</div>${lh}</div><div class="todo-actions"><button class="icon-btn" onclick="editFile('${f.id}')"><i class="ti ti-pencil"></i></button><button class="icon-btn" onclick="deleteFile('${f.id}')"><i class="ti ti-trash"></i></button></div></div>`;}
@@ -673,7 +742,7 @@ function updateProjStatus(id,s){const p=state.projects.find(x=>x.id===id);if(p){
 function deleteProject(id){if(!confirm('Delete this project?'))return;state.projects=state.projects.filter(p=>p.id!==id);saveLocal();renderProjects();}
 
 // SUBJECT TABS
-function showSubjTab(tab,el){document.querySelectorAll('#subj-tabs .tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));el.classList.add('active');const map={todos:'tab-todos',books:'tab-books',quizzes:'tab-quizzes',exams:'tab-exams',activities:'tab-activities','subj-files':'tab-subj-files'};document.getElementById(map[tab])?.classList.add('active');const s=state.currentSubject;if(tab==='todos')renderSubjTodos(s);else if(tab==='books')renderBooks(s);else if(tab==='subj-files')renderSubjFiles(s);else{const tm={quizzes:'Quiz',exams:'Exam',activities:'Activity'};renderATab(s,tm[tab],map[tab]);}}
+function showSubjTab(tab,el){document.querySelectorAll('#subj-tabs .tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));el.classList.add('active');const map={todos:'tab-todos',quizzes:'tab-quizzes',exams:'tab-exams',activities:'tab-activities','subj-files':'tab-subj-files'};document.getElementById(map[tab])?.classList.add('active');const s=state.currentSubject;if(tab==='todos')renderSubjTodos(s);else if(tab==='subj-files')renderSubjFiles(s);else{const tm={quizzes:'Quiz',exams:'Exam',activities:'Activity'};renderATab(s,tm[tab],map[tab]);}}
 
 // BOOT
 gcalInit();
