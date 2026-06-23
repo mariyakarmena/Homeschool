@@ -223,15 +223,19 @@
     <div class="nav-item" onclick="showPage('grades',this)"><i class="ti ti-chart-bar"></i><span>Grade Report</span></div>
     <div class="nav-item" onclick="showPage('todos',this)"><i class="ti ti-list-check"></i><span>All To-Dos</span></div>
     <div class="nav-section">Subjects</div>
-    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Math"><span class="subject-dot" style="background:#378ADD"></span><span>Math</span></div>
-    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Science"><span class="subject-dot" style="background:#1D9E75"></span><span>Science</span></div>
     <div class="nav-item" onclick="showPage('subject',this)" data-subj="English"><span class="subject-dot" style="background:#D85A30"></span><span>English</span></div>
     <div class="nav-item" onclick="showPage('subject',this)" data-subj="Filipino"><span class="subject-dot" style="background:#D4537E"></span><span>Filipino</span></div>
-    <div class="nav-item" onclick="showPage('subject',this)" data-subj="GMRC"><span class="subject-dot" style="background:#C0408A"></span><span>GMRC</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Math"><span class="subject-dot" style="background:#378ADD"></span><span>Math</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Science"><span class="subject-dot" style="background:#1D9E75"></span><span>Science</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Araling Panlipunan"><span class="subject-dot" style="background:#8E6A2F"></span><span>Araling Panlipunan</span></div>
     <div class="nav-item" onclick="showPage('subject',this)" data-subj="Computer"><span class="subject-dot" style="background:#7F77DD"></span><span>Computer</span></div>
-    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Arts"><span class="subject-dot" style="background:#EF9F27"></span><span>Arts</span></div>
-    <div class="nav-item" onclick="showPage('subject',this)" data-subj="P.E."><span class="subject-dot" style="background:#E67A12"></span><span>P.E.</span></div>
     <div class="nav-item" onclick="showPage('subject',this)" data-subj="Faith"><span class="subject-dot" style="background:#E24B4A"></span><span>Faith</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Music"><span class="subject-dot" style="background:#2C9AB7"></span><span>Music</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Health"><span class="subject-dot" style="background:#6FAF3F"></span><span>Health</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Arts"><span class="subject-dot" style="background:#EF9F27"></span><span>Arts</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="PE"><span class="subject-dot" style="background:#E67A12"></span><span>PE</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="GMRC"><span class="subject-dot" style="background:#C0408A"></span><span>GMRC</span></div>
+    <div class="nav-item" onclick="showPage('subject',this)" data-subj="Spelling"><span class="subject-dot" style="background:#5A8FCE"></span><span>Spelling</span></div>
     <div class="nav-section">Records</div>
     <div class="nav-item" onclick="showPage('files',this)"><i class="ti ti-folder"></i><span>Files &amp; Workbooks</span></div>
     <div class="nav-item" onclick="showPage('projects',this)"><i class="ti ti-checks"></i><span>Projects</span></div>
@@ -410,13 +414,13 @@
 
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbwd89CBdmTWvts5F2qZUYyDPPTvowJ6yxLmbzbOttXYrYk1Zcyx6_jGI3pZWdSuV49Cog/exec';
-const SUBJECTS=['Math','Science','English','Filipino','GMRC','Computer','Arts','P.E.','Faith'];
-const SC={Math:'#378ADD',Science:'#1D9E75',English:'#D85A30',Filipino:'#D4537E',GMRC:'#C0408A',Computer:'#7F77DD',Arts:'#EF9F27','P.E.':'#E67A12',Faith:'#E24B4A'};
-const SI={Math:'ti-math-function',Science:'ti-flask',English:'ti-book',Filipino:'ti-language',GMRC:'ti-heart-handshake',Computer:'ti-device-laptop',Arts:'ti-palette','P.E.':'ti-run',Faith:'ti-heart'};
+const SUBJECTS=['English','Filipino','Math','Science','Araling Panlipunan','Computer','Faith','Music','Health','Arts','PE','GMRC','Spelling'];
+const SC={English:'#D85A30',Filipino:'#D4537E',Math:'#378ADD',Science:'#1D9E75','Araling Panlipunan':'#8E6A2F',Computer:'#7F77DD',Faith:'#E24B4A',Music:'#2C9AB7',Health:'#6FAF3F',Arts:'#EF9F27',PE:'#E67A12',GMRC:'#C0408A',Spelling:'#5A8FCE'};
+const SI={English:'ti-book',Filipino:'ti-language',Math:'ti-math-function',Science:'ti-flask','Araling Panlipunan':'ti-map',Computer:'ti-device-laptop',Faith:'ti-heart',Music:'ti-music',Health:'ti-heartbeat',Arts:'ti-palette',PE:'ti-run',GMRC:'ti-heart-handshake',Spelling:'ti-abc'};
 const QUARTERS=['Q1','Q2','Q3','Q4'];
 const DOWS_S=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DOWS_F=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const SCHED={Monday:['Faith','English','Filipino','P.E.'],Tuesday:['Faith','Science','Math','Arts'],Wednesday:['Faith','English','Filipino','P.E.'],Thursday:['Faith','Science','Math','Arts'],Friday:['GMRC','Computer']};
+const SCHED={Monday:['Faith','English','Filipino','PE'],Tuesday:['Faith','Science','Math','Arts'],Wednesday:['Faith','English','Filipino','PE'],Thursday:['Faith','Science','Math','Arts'],Friday:['GMRC','Computer']};
 const EV_COLORS=['#1D9E75','#378ADD','#D85A30','#C0408A','#7F77DD','#EF9F27','#E24B4A','#D4537E'];
 let evCI=0; const nextColor=()=>EV_COLORS[evCI++%EV_COLORS.length];
 const SLOT_H=48;
@@ -435,9 +439,10 @@ updateClock();setInterval(updateClock,1000);
 // GAS
 async function gasGet(p){return(await fetch(p?GAS_URL+'?'+new URLSearchParams(p):GAS_URL)).json();}
 async function gasPost(b){return(await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)})).text();}
-const nA=a=>({...a,subj:a.subj||a.subject||'',pct:a.pct||Math.round((a.score/a.total)*100)});
-const nF=f=>({...f,subj:f.subj||f.subject||''});
-const nT=t=>({...t,subj:t.subj||t.subject||''});
+const cleanSubject=s=>String(s||'').trim()==='P.E.'?'PE':String(s||'').trim();
+const nA=a=>({...a,subj:cleanSubject(a.subj||a.subject),subject:cleanSubject(a.subject||a.subj),pct:a.pct||Math.round((a.score/a.total)*100)});
+const nF=f=>({...f,subj:cleanSubject(f.subj||f.subject),subject:cleanSubject(f.subject||f.subj)});
+const nT=t=>({...t,subj:cleanSubject(t.subj||t.subject),subject:cleanSubject(t.subject||t.subj)});
 async function loadAll(){try{const[a,f,t]=await Promise.all([gasGet(),gasGet({type:'files'}),gasGet({type:'todos'})]);state.assessments=Array.isArray(a)?a.map(nA):[];state.files=Array.isArray(f)?f.map(nF):[];state.todos=Array.isArray(t)?t.map(nT):[];refreshCurrent();}catch(e){console.error(e);}}
 async function loadCalEvents(){
   try{
@@ -446,13 +451,15 @@ async function loadCalEvents(){
     calEvents={};
     data.forEach(ev=>{
       if(!ev.datekey)return;
-      const k=String(ev.datekey).trim();
+      const k=cleanDateKey(ev.datekey);
+      const start=cleanTime(ev.start);
+      const end=cleanTime(ev.end);
       if(!calEvents[k])calEvents[k]=[];
       calEvents[k].push({
         id:String(ev.id),
         title:String(ev.title||''),
-        start:String(ev.start||''),
-        end:String(ev.end||''),
+        start,
+        end,
         color:String(ev.color||'#1D9E75'),
         allDay:ev.allday===true||String(ev.allday).toUpperCase()==='TRUE'
       });
@@ -472,7 +479,22 @@ function sQAvg(s,q){return getAvg(state.assessments.filter(a=>a.subj===s&&a.quar
 function fAvg(s){const av=QUARTERS.map(q=>sQAvg(s,q)).filter(v=>v!==null);return av.length?Math.round(av.reduce((a,b)=>a+b,0)/av.length):null;}
 function rmk(avg){if(avg===null)return{t:'—',c:'badge-gray'};if(avg>=90)return{t:'Outstanding',c:'badge-teal'};if(avg>=80)return{t:'Very Satisfactory',c:'badge-green'};if(avg>=70)return{t:'Satisfactory',c:'badge-blue'};if(avg>=60)return{t:'Fairly Satisfactory',c:'badge-amber'};return{t:'Needs Improvement',c:'badge-red'};}
 function fmtD(d){if(!d)return'—';const dt=new Date(d);return isNaN(dt)?d:dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
-function fmt12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+function cleanDateKey(v){
+  const s=String(v||'').trim();
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return m[0];
+  const d=new Date(s);
+  return isNaN(d)?s:dKey(d);
+}
+function cleanTime(v){
+  const s=String(v||'').trim();
+  const m=s.match(/(\d{1,2}):(\d{2})/);
+  if(!m)return'';
+  const h=Math.max(0,Math.min(23,Number(m[1])||0));
+  const min=Math.max(0,Math.min(59,Number(m[2])||0));
+  return`${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+}
+function fmt12(t){t=cleanTime(t);if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
 function dKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function nowPH(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Manila'}));}
 
@@ -544,13 +566,14 @@ function renderGcal(){
   document.getElementById('gcal-daycols').innerHTML=days.map((d,di)=>{
     const k=dKey(d),tod=k===todK;
     const cells=HOURS.map(h=>`<div class="gcal-hour-cell" onclick="gcalOpenAdd('${k}',${h})"><div class="gcal-half-line"></div></div>`).join('');
-    const tevs=(calEvents[k]||[]).filter(e=>e.start);
+    const tevs=(calEvents[k]||[]).filter(e=>cleanTime(e.start));
     const evBlocks=tevs.map(ev=>{
-      const[sh,sm]=ev.start.split(':').map(Number);
+      const start=cleanTime(ev.start),end=cleanTime(ev.end);
+      const[sh,sm]=start.split(':').map(Number);
       const top=sh*SLOT_H+sm*0.8;
-      let h=SLOT_H;if(ev.end){const[eh,em]=ev.end.split(':').map(Number);h=Math.max(18,(eh*60+em-sh*60-sm)*0.8);}
+      let h=SLOT_H;if(end){const[eh,em]=end.split(':').map(Number);h=Math.max(18,(eh*60+em-sh*60-sm)*0.8);}
       const col=ev.color||'#1D9E75';
-      const tl=ev.end?`${fmt12(ev.start)} – ${fmt12(ev.end)}`:fmt12(ev.start);
+      const tl=end?`${fmt12(start)} – ${fmt12(end)}`:fmt12(start);
       return`<div class="gcal-ev" style="top:${top}px;height:${h}px;background:${col}1A;color:${col};border-left-color:${col}" onclick="gcalDel(event,'${k}','${ev.id}')" title="${ev.title} · ${tl}"><div class="gcal-ev-title">${ev.title}</div>${h>28?`<div class="gcal-ev-time">${tl}</div>`:''}</div>`;
     }).join('');
     let nl='';if(tod){const px=(now.getHours()*60+now.getMinutes())*0.8;nl=`<div class="gcal-now-line" style="top:${px}px"></div>`;}
@@ -580,8 +603,9 @@ async function gcalSave(){
   if(!title){document.getElementById('gcal-ev-title').focus();return;}
   const key=gcal.pendingKey;
   if(!key){alert('No date selected.');return;}
-  const start=document.getElementById('gcal-ev-start').value;
-  const end=document.getElementById('gcal-ev-end').value;
+  const start=cleanTime(document.getElementById('gcal-ev-start').value);
+  const end=cleanTime(document.getElementById('gcal-ev-end').value);
+  if(!start){alert('Please choose a start time.');return;}
   const color=nextColor();
   const newId=String(Date.now());
 
